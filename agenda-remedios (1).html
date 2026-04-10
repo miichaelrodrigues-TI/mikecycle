@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MikeCycle</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #11141c;
+    --surface2: #181c27;
+    --border: #1f2535;
+    --accent: #00e5a0;
+    --accent2: #0099ff;
+    --warn: #ff6b35;
+    --text: #e2e8f0;
+    --text-muted: #5a6380;
+    --checked: #1a2e20;
+    --checked-border: #00e5a0;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── LOGIN SCREEN ───────────────────────────────────── */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    gap: 32px;
+  }
+
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .login-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .login-title {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .login-title span { color: var(--accent); }
+
+  .login-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .btn-google {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    color: #1a1a1a;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px 28px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-google:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+  .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  /* ── LOADING ─────────────────────────────────────────── */
+  #loadingScreen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── APP ─────────────────────────────────────────────── */
+  #appScreen { display: none; }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo { display: flex; flex-direction: column; }
+
+  .logo-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+  }
+
+  .user-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: var(--warn); color: var(--warn); }
+
+  .current-day { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent2); letter-spacing: 0.05em; }
+  .date-display { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+  /* Sync status */
+  .sync-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s;
+  }
+
+  .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
+  .sync-dot.synced  { background: var(--accent); }
+  .sync-dot.error   { background: var(--warn); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Progress */
+  .global-progress {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .progress-label { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; white-space: nowrap; }
+  .progress-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.5s ease; }
+  .progress-pct { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--accent); white-space: nowrap; min-width: 40px; text-align: right; }
+
+  /* Main nav */
+  .main-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    width: fit-content;
+  }
+
+  .main-tab {
+    padding: 8px 22px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+    border: none;
+    background: none;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .main-tab.active {
+    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,153,255,0.1));
+    color: var(--accent);
+  }
+
+  /* Day tabs */
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .day-tabs::-webkit-scrollbar { display: none; }
+
+  .day-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+  }
+
+  .day-tab .day-name { font-size: 12px; letter-spacing: 0.05em; }
+  .day-tab .day-dots { display: flex; gap: 3px; }
+  .day-tab .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
+  .day-tab:hover { border-color: var(--accent2); color: var(--text); }
+  .day-tab.active { background: linear-gradient(135deg, rgba(0,229,160,0.12), rgba(0,153,255,0.08)); border-color: var(--accent); color: var(--accent); }
+  .day-tab.today { position: relative; }
+  .day-tab.today::after { content: '●'; position: absolute; top: -6px; right: -6px; font-size: 8px; color: var(--accent); }
+
+  .day-panel { display: none; }
+  .day-panel.active { display: block; animation: fadeSlide 0.25s ease; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .day-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .day-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
+
+  .med-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+
+  .med-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .med-item:hover { border-color: rgba(0,229,160,0.3); background: var(--surface2); }
+  .med-item.checked { background: var(--checked); border-color: var(--checked-border); opacity: 0.75; }
+
+  .med-checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--text-muted);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .med-item.checked .med-checkbox { background: var(--accent); border-color: var(--accent); }
+  .med-checkbox svg { display: none; }
+  .med-item.checked .med-checkbox svg { display: block; }
+
+  .med-info { flex: 1; }
+  .med-name { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+  .med-item.checked .med-name { text-decoration: line-through; color: var(--text-muted); }
+  .med-detail { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 3px; letter-spacing: 0.05em; }
+
+  .med-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+  .tag-treino   { color: var(--warn); border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.08); }
+  .tag-noite    { color: #a78bfa; border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .tag-manha    { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+  .tag-cafe     { color: var(--accent2); border-color: rgba(0,153,255,0.4); background: rgba(0,153,255,0.08); }
+  .tag-standard { color: var(--text-muted); border-color: var(--border); background: transparent; }
+
+  .delete-btn {
+    width: 28px; height: 28px; border: none; background: none;
+    color: var(--text-muted); cursor: pointer; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.15s; flex-shrink: 0; opacity: 0;
+  }
+  .med-item:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { background: rgba(255,80,80,0.15); color: #ff5050; }
+
+  .add-section { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); padding: 20px; transition: border-color 0.2s; }
+  .add-section:focus-within { border-color: var(--accent); border-style: solid; }
+
+  .add-title { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; font-family: 'DM Mono', monospace; }
+
+  .add-form { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; align-items: end; }
+
+  @media (max-width: 600px) {
+    .add-form { grid-template-columns: 1fr 1fr; }
+    .add-form .btn-add { grid-column: span 2; }
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .field-input, .field-select {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .field-input:focus, .field-select:focus { border-color: var(--accent); }
+  .field-select option { background: var(--surface2); }
+
+  .btn-add {
+    background: var(--accent); color: #000; border: none; border-radius: var(--radius-sm);
+    padding: 10px 20px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.03em; transition: all 0.2s; white-space: nowrap; height: 40px;
+  }
+  .btn-add:hover { background: #00ffb3; transform: translateY(-1px); }
+
+  .day-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+
+  .btn-reset {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    border-radius: var(--radius-sm); padding: 7px 14px; font-family: 'DM Mono', monospace;
+    font-size: 11px; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--warn); color: var(--warn); }
+
+  /* ── RELATÓRIO ─────────────────────────────────── */
+  #viewRelatorio { display: none; }
+
+  .rel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .rel-title { font-size: 22px; font-weight: 700; }
+
+  .btn-close-week {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000; border: none; border-radius: var(--radius-sm);
+    padding: 10px 20px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s;
+  }
+  .btn-close-week:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .rel-current { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 28px; }
+  .rel-section-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; }
+
+  .med-adherence-list { display: flex; flex-direction: column; gap: 14px; }
+  .med-adherence-item { display: flex; align-items: center; gap: 14px; }
+  .adh-name { font-size: 13px; font-weight: 600; min-width: 180px; flex-shrink: 0; }
+  .adh-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .adh-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .adh-pct { font-family: 'DM Mono', monospace; font-size: 12px; min-width: 38px; text-align: right; }
+  .adh-doses { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); min-width: 50px; text-align: right; }
+
+  .history-list { display: flex; flex-direction: column; gap: 16px; }
+  .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .history-card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; transition: background 0.2s; }
+  .history-card-header:hover { background: var(--surface2); }
+  .history-week-label { font-size: 14px; font-weight: 600; }
+  .history-week-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .history-pct-badge { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; }
+  .history-card-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+  .history-card-body.open { display: block; }
+  .history-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .history-day-row:last-child { border-bottom: none; }
+  .hdr-day { font-size: 13px; font-weight: 600; min-width: 80px; }
+  .hdr-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .hdr-bar-fill { height: 100%; border-radius: 3px; }
+  .hdr-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); min-width: 38px; text-align: right; }
+  .delete-history-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; margin-top: 14px; }
+  .delete-history-btn:hover { color: #ff5050; background: rgba(255,80,80,0.1); }
+  .empty-history { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); text-align: center; padding: 40px 0; line-height: 2; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius-sm);
+    padding: 12px 20px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent);
+    z-index: 999; transform: translateY(60px); opacity: 0; transition: all 0.3s ease; letter-spacing: 0.05em;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-logo">
+    <span class="login-tag">// Seu protocolo pessoal</span>
+    <div class="login-title"><span>Mike</span>Cycle</div>
+    <div class="login-sub">Controle de ciclo semanal</div>
+  </div>
+  <button class="btn-google" onclick="loginGoogle()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Entrar com Google
+  </button>
+</div>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-label">Sincronizando dados...</div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <span class="logo-tag">// MikeCycle v3.0</span>
+      <h1><span>Mike</span>Cycle</h1>
+    </div>
+    <div class="header-right">
+      <div class="user-info">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span class="user-name" id="userName"></span>
+        <button class="btn-logout" onclick="logoutGoogle()">Sair</button>
+      </div>
+      <div class="sync-status">
+        <div class="sync-dot" id="syncDot"></div>
+        <span id="syncLabel">—</span>
+      </div>
+      <div class="current-day" id="currentDayLabel">—</div>
+      <div class="date-display" id="dateDisplay">—</div>
+    </div>
+  </header>
+
+  <div class="global-progress">
+    <span class="progress-label">PROGRESSO SEMANAL</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="globalBar" style="width:0%"></div></div>
+    <span class="progress-pct" id="globalPct">0%</span>
+  </div>
+
+  <div class="main-nav">
+    <button class="main-tab active" onclick="switchView('agenda')">Agenda</button>
+    <button class="main-tab" onclick="switchView('relatorio')">Relatório</button>
+  </div>
+
+  <!-- AGENDA -->
+  <div id="viewAgenda">
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="dayPanels"></div>
+  </div>
+
+  <!-- RELATÓRIO -->
+  <div id="viewRelatorio">
+    <div class="rel-header">
+      <div class="rel-title">Adesão Semanal</div>
+      <button class="btn-close-week" onclick="closeWeek()">⬇ Fechar semana atual</button>
+    </div>
+    <div class="rel-current">
+      <div class="rel-section-label">Semana atual — em andamento</div>
+      <div class="med-adherence-list" id="currentAdherence"></div>
+    </div>
+    <div class="rel-section-label" style="margin-bottom:16px;">Histórico de semanas</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp }                              from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                                                      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc }
+                                                      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── Firebase config ───────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyADUAqt09VqHHvDspQydlEVUZSZmYYL31g",
+  authDomain:        "mikecycle-a96e8.firebaseapp.com",
+  projectId:         "mikecycle-a96e8",
+  storageBucket:     "mikecycle-a96e8.firebasestorage.app",
+  messagingSenderId: "53041455968",
+  appId:             "1:53041455968:web:7d3bcb2f80c2b3a46d7405"
+};
+
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const db       = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// ── Constants ─────────────────────────────────────────────
+const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+
+const INITIAL = {
+  'Segunda': [
+    { name:'Anastrozol',            detail:'',                   tag:'standard' },
+    { name:'ADDERAMAX',             detail:'',                   tag:'standard' },
+    { name:'LIVALO',                detail:'Noite',              tag:'noite'    },
+    { name:'OXIMETOLONA + MITBURN', detail:'1h antes do treino', tag:'treino'   },
+  ],
+  'Terça': [
+    { name:'ADDERAMAX', detail:'',      tag:'standard' },
+    { name:'LIVALO',    detail:'Noite', tag:'noite'    },
+  ],
+  'Quarta': [
+    { name:'Anastrozol', detail:'',      tag:'standard' },
+    { name:'ADDERAMAX',  detail:'',      tag:'standard' },
+    { name:'LIVALO',     detail:'Noite', tag:'noite'    },
+  ],
+  'Quinta': [
+    { name:'ADDERAMAX', detail:'Manhã', tag:'manha' },
+    { name:'LIVALO',    detail:'Noite', tag:'noite' },
+  ],
+  'Sexta': [
+    { name:'Anastrozol',            detail:'Após o café',        tag:'cafe'     },
+    { name:'Durateston',            detail:'',                   tag:'standard' },
+    { name:'ADDERAMAX',             detail:'Após o café',        tag:'cafe'     },
+    { name:'LIVALO',                detail:'Noite',              tag:'noite'    },
+    { name:'OXIMETOLONA + MITBURN', detail:'1h antes do treino', tag:'treino'   },
+  ],
+  'Sábado': [
+    { name:'ADDERAMAX',             detail:'',                   tag:'standard' },
+    { name:'LIVALO',                detail:'Noite',              tag:'noite'    },
+    { name:'OXIMETOLONA + MITBURN', detail:'1h antes do treino', tag:'treino'   },
+  ],
+  'Domingo': [
+    { name:'ADDERAMAX',             detail:'',                   tag:'standard' },
+    { name:'LIVALO',                detail:'Noite',              tag:'noite'    },
+    { name:'OXIMETOLONA + MITBURN', detail:'1h antes do treino', tag:'treino'   },
+  ],
+};
+
+// ── State ─────────────────────────────────────────────────
+let state   = null;
+let history = [];
+let uid     = null;
+
+const jsDay      = new Date().getDay();
+const todayIndex = jsDay === 0 ? 6 : jsDay - 1;
+let activeDay    = DAYS[todayIndex];
+let currentView  = 'agenda';
+
+// ── Helpers ───────────────────────────────────────────────
+function getWeekStart() {
+  const now=new Date(), day=now.getDay(), diff=day===0?-6:1-day, mon=new Date(now);
+  mon.setDate(now.getDate()+diff);
+  return mon.toISOString().slice(0,10);
+}
+
+function formatDate(iso) { const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function pctColor(pct)   { return pct>=85?'var(--accent)':pct>=60?'#fbbf24':'var(--warn)'; }
+
+function tagLabel(tag) {
+  return {standard:'STD',manha:'MANHÃ',noite:'NOITE',cafe:'CAFÉ',treino:'TREINO'}[tag]||tag.toUpperCase();
+}
+
+// ── Sync status ───────────────────────────────────────────
+function setSyncStatus(status, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + status;
+  lbl.textContent = label;
+}
+
+// ── Firestore ─────────────────────────────────────────────
+function stateRef()   { return doc(db, 'users', uid, 'data', 'state'); }
+function historyRef() { return collection(db, 'users', uid, 'history'); }
+
+async function loadFromFirestore() {
+  showLoading(true);
+  try {
+    // Load state
+    const snap = await getDoc(stateRef());
+    if (snap.exists()) {
+      state = snap.data();
+      // Ensure all days exist
+      DAYS.forEach(d => {
+        if (!state.days[d]) {
+          state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
+            id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
+          }));
+        }
+      });
+    } else {
+      // First time: create from INITIAL
+      state = { days:{}, weekStart: getWeekStart() };
+      DAYS.forEach(d => {
+        state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
+          id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
+        }));
+      });
+      await saveToFirestore();
+    }
+
+    // Load history
+    const hSnap = await getDocs(historyRef());
+    history = [];
+    hSnap.forEach(d => history.push({ firestoreId: d.id, ...d.data() }));
+    history.sort((a,b) => a.weekStart > b.weekStart ? 1 : -1);
+
+    setSyncStatus('synced', 'Sincronizado');
+  } catch(e) {
+    setSyncStatus('error', 'Erro de sync');
+    console.error(e);
+  }
+  showLoading(false);
+}
+
+async function saveToFirestore() {
+  setSyncStatus('syncing', 'Salvando...');
+  try {
+    await setDoc(stateRef(), state);
+    setSyncStatus('synced', 'Sincronizado');
+  } catch(e) {
+    setSyncStatus('error', 'Erro ao salvar');
+    console.error(e);
+  }
+}
+
+// ── Auth ──────────────────────────────────────────────────
+window.loginGoogle = async function() {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    showToast('Erro ao fazer login');
+    console.error(e);
+  }
+};
+
+window.logoutGoogle = async function() {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    uid = user.uid;
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('appScreen').style.display    = 'block';
+    document.getElementById('userAvatar').src             = user.photoURL || '';
+    document.getElementById('userName').textContent       = user.displayName || user.email;
+    await loadFromFirestore();
+    render();
+  } else {
+    uid = null;
+    state = null;
+    history = [];
+    document.getElementById('loginScreen').style.display  = 'flex';
+    document.getElementById('appScreen').style.display    = 'none';
+    document.getElementById('loadingScreen').style.display= 'none';
+  }
+});
+
+function showLoading(show) {
+  document.getElementById('loadingScreen').style.display = show ? 'flex' : 'none';
+}
+
+// ── Switch view ───────────────────────────────────────────
+window.switchView = function(view) {
+  currentView = view;
+  document.getElementById('viewAgenda').style.display    = view==='agenda'    ? 'block' : 'none';
+  document.getElementById('viewRelatorio').style.display = view==='relatorio' ? 'block' : 'none';
+  document.querySelectorAll('.main-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&view==='agenda')||(i===1&&view==='relatorio')));
+  if (view==='relatorio') renderRelatorio();
+};
+
+// ── Adherence ─────────────────────────────────────────────
+function buildAdherenceMap(days) {
+  const map={};
+  DAYS.forEach(day=>{
+    (days[day]||[]).forEach(item=>{
+      if(!map[item.name]) map[item.name]={done:0,total:0};
+      map[item.name].total++;
+      if(item.checked) map[item.name].done++;
+    });
+  });
+  return map;
+}
+
+// ── Relatório ─────────────────────────────────────────────
+function renderRelatorio() {
+  if (!state) return;
+
+  // Semana atual
+  const el  = document.getElementById('currentAdherence');
+  const map = buildAdherenceMap(state.days);
+  const entries = Object.entries(map).sort((a,b)=>{
+    const pa=a[1].total?a[1].done/a[1].total:0, pb=b[1].total?b[1].done/b[1].total:0; return pa-pb;
+  });
+
+  el.innerHTML = entries.length ? entries.map(([name,{done,total}])=>{
+    const pct=total?Math.round((done/total)*100):0, color=pctColor(pct);
+    return `<div class="med-adherence-item">
+      <div class="adh-name">${name}</div>
+      <div class="adh-bar-wrap"><div class="adh-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="adh-pct" style="color:${color}">${pct}%</div>
+      <div class="adh-doses">${done}/${total}×</div>
+    </div>`;
+  }).join('') : `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);">Nenhum dado ainda.</div>`;
+
+  // Histórico
+  const hEl = document.getElementById('historyList');
+  if (!history.length) {
+    hEl.innerHTML=`<div class="empty-history">Nenhuma semana fechada ainda.<br>Use "Fechar semana atual" ao final de cada semana.</div>`;
+    return;
+  }
+
+  hEl.innerHTML = [...history].reverse().map((week, revIdx)=>{
+    const idx   = history.length-1-revIdx;
+    const total = DAYS.reduce((s,d)=>s+(week.days[d]||[]).length,0);
+    const done  = DAYS.reduce((s,d)=>s+(week.days[d]||[]).filter(x=>x.checked).length,0);
+    const pct   = total?Math.round((done/total)*100):0;
+    const color = pctColor(pct);
+
+    const dayRows = DAYS.map(day=>{
+      const items=(week.days[day]||[]), d2=items.filter(x=>x.checked).length, t2=items.length;
+      const p=t2?Math.round((d2/t2)*100):0;
+      return `<div class="history-day-row">
+        <div class="hdr-day">${day}</div>
+        <div class="hdr-bar-wrap"><div class="hdr-bar-fill" style="width:${p}%;background:${pctColor(p)}"></div></div>
+        <div class="hdr-pct">${p}%</div>
+      </div>`;
+    }).join('');
+
+    const medMap  = buildAdherenceMap(week.days);
+    const medRows = Object.entries(medMap).sort((a,b)=>{
+      const pa=a[1].total?a[1].done/a[1].total:0, pb=b[1].total?b[1].done/b[1].total:0; return pa-pb;
+    }).map(([name,{done:d2,total:t2}])=>{
+      const p=t2?Math.round((d2/t2)*100):0, c=pctColor(p);
+      return `<div class="med-adherence-item" style="margin-top:10px;">
+        <div class="adh-name">${name}</div>
+        <div class="adh-bar-wrap"><div class="adh-bar-fill" style="width:${p}%;background:${c}"></div></div>
+        <div class="adh-pct" style="color:${c}">${p}%</div>
+        <div class="adh-doses">${d2}/${t2}×</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="history-card">
+      <div class="history-card-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div>
+          <div class="history-week-label">Semana ${idx+1} — ${formatDate(week.weekStart)} → ${formatDate(week.weekEnd)}</div>
+          <div class="history-week-meta">${done}/${total} doses registradas</div>
+        </div>
+        <div class="history-pct-badge" style="color:${color}">${pct}%</div>
+      </div>
+      <div class="history-card-body">
+        <div style="margin-top:16px;">
+          <div class="rel-section-label" style="margin-bottom:8px;">Por dia</div>
+          ${dayRows}
+        </div>
+        <div style="margin-top:20px;">
+          <div class="rel-section-label" style="margin-bottom:4px;">Por remédio</div>
+          ${medRows}
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="delete-history-btn" onclick="deleteHistory('${week.firestoreId}')">🗑 Apagar esta semana</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.deleteHistory = async function(firestoreId) {
+  if (!confirm('Apagar esta semana do histórico?')) return;
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'history', firestoreId));
+    history = history.filter(w => w.firestoreId !== firestoreId);
+    renderRelatorio();
+    showToast('Semana removida');
+  } catch(e) {
+    showToast('Erro ao apagar');
+  }
+};
+
+// ── Close week ────────────────────────────────────────────
+window.closeWeek = async function() {
+  const total = DAYS.reduce((s,d)=>s+(state.days[d]||[]).length,0);
+  if (!total) { showToast('Nenhum remédio cadastrado'); return; }
+
+  const weekData = {
+    weekStart : state.weekStart,
+    weekEnd   : new Date().toISOString().slice(0,10),
+    closedAt  : new Date().toISOString(),
+    days      : JSON.parse(JSON.stringify(state.days)),
+  };
+
+  try {
+    const ref = await addDoc(historyRef(), weekData);
+    history.push({ firestoreId: ref.id, ...weekData });
+    DAYS.forEach(d => state.days[d].forEach(x => x.checked = false));
+    state.weekStart = getWeekStart();
+    await saveToFirestore();
+    render();
+    renderRelatorio();
+    showToast('✓ Semana fechada e salva na nuvem!');
+  } catch(e) {
+    showToast('Erro ao fechar semana');
+    console.error(e);
+  }
+};
+
+// ── Render agenda ─────────────────────────────────────────
+function render() {
+  if (!state) return;
+  renderTabs();
+  renderPanels();
+  updateGlobalProgress();
+  updateHeader();
+}
+
+function renderTabs() {
+  const el = document.getElementById('dayTabs');
+  el.innerHTML='';
+  DAYS.forEach((day,idx)=>{
+    const items=state.days[day]||[], done=items.filter(x=>x.checked).length;
+    const tab=document.createElement('div');
+    tab.className='day-tab'+(day===activeDay?' active':'')+(idx===todayIndex?' today':'');
+    const dots=items.slice(0,5).map(i=>`<div class="dot" style="${i.checked?'background:var(--accent)':''}"></div>`).join('');
+    tab.innerHTML=`<span class="day-name">${day.substring(0,3).toUpperCase()}</span><div class="day-dots">${dots||'<div class="dot"></div>'}</div>`;
+    tab.title=`${done}/${items.length} concluídos`;
+    tab.addEventListener('click',()=>{ activeDay=day; render(); });
+    el.appendChild(tab);
+  });
+}
+
+function renderPanels() {
+  const container=document.getElementById('dayPanels');
+  container.innerHTML='';
+  DAYS.forEach(day=>{
+    const panel=document.createElement('div');
+    panel.className='day-panel'+(day===activeDay?' active':'');
+    const items=state.days[day]||[], done=items.filter(x=>x.checked).length;
+
+    panel.innerHTML=`
+      <div class="day-header">
+        <div class="day-title">${day}</div>
+        <div class="day-count">${done} / ${items.length} tomados</div>
+      </div>
+      <div class="med-list" id="list-${day}"></div>
+      <div class="add-section">
+        <div class="add-title">+ Adicionar remédio</div>
+        <div class="add-form">
+          <div class="field-group"><label class="field-label">Nome</label><input class="field-input" id="inp-name-${day}" placeholder="Ex: Vitamina D" /></div>
+          <div class="field-group"><label class="field-label">Detalhe</label><input class="field-input" id="inp-detail-${day}" placeholder="Ex: Manhã, Noite..." /></div>
+          <div class="field-group"><label class="field-label">Tipo</label>
+            <select class="field-select" id="inp-tag-${day}">
+              <option value="standard">Padrão</option>
+              <option value="manha">Manhã</option>
+              <option value="noite">Noite</option>
+              <option value="cafe">Após café</option>
+              <option value="treino">Treino</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="addItem('${day}')">Adicionar</button>
+        </div>
+      </div>
+      <div class="day-actions"><button class="btn-reset" onclick="resetDay('${day}')">↺ Resetar dia</button></div>`;
+
+    container.appendChild(panel);
+
+    const listEl=document.getElementById(`list-${day}`);
+    if (!items.length) {
+      listEl.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);padding:12px 0;">Nenhum remédio cadastrado.</div>`;
+    } else {
+      items.forEach(item=>{
+        const el=document.createElement('div');
+        el.className='med-item'+(item.checked?' checked':'');
+        el.innerHTML=`
+          <div class="med-checkbox">
+            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="med-info">
+            <div class="med-name">${item.name}</div>
+            ${item.detail?`<div class="med-detail">${item.detail}</div>`:''}
+          </div>
+          <span class="med-tag tag-${item.tag}">${tagLabel(item.tag)}</span>
+          <button class="delete-btn" title="Remover" onclick="removeItem('${day}','${item.id}',event)">×</button>`;
+        el.addEventListener('click',()=>toggleItem(day,item.id));
+        listEl.appendChild(el);
+      });
+    }
+  });
+}
+
+window.toggleItem = async function(day, id) {
+  const item=state.days[day].find(x=>x.id===id);
+  if(!item) return;
+  item.checked=!item.checked;
+  render();
+  await saveToFirestore();
+  if(item.checked) showToast(`✓ ${item.name} marcado`);
+};
+
+window.removeItem = async function(day, id, e) {
+  e.stopPropagation();
+  state.days[day]=state.days[day].filter(x=>x.id!==id);
+  render();
+  await saveToFirestore();
+  showToast('Remédio removido');
+};
+
+window.addItem = async function(day) {
+  const nEl=document.getElementById(`inp-name-${day}`), dEl=document.getElementById(`inp-detail-${day}`), tEl=document.getElementById(`inp-tag-${day}`);
+  const name=nEl.value.trim();
+  if(!name){ nEl.focus(); return; }
+  state.days[day].push({ id:`${day}-${Date.now()}`, name, detail:dEl.value.trim(), tag:tEl.value, checked:false });
+  nEl.value=''; dEl.value=''; tEl.value='standard';
+  render();
+  await saveToFirestore();
+  showToast(`+ ${name} adicionado`);
+};
+
+window.resetDay = async function(day) {
+  state.days[day].forEach(x=>x.checked=false);
+  render();
+  await saveToFirestore();
+  showToast('Dia resetado');
+};
+
+function updateGlobalProgress() {
+  let total=0,done=0;
+  DAYS.forEach(d=>{ const items=state.days[d]||[]; total+=items.length; done+=items.filter(x=>x.checked).length; });
+  const pct=total?Math.round((done/total)*100):0;
+  document.getElementById('globalBar').style.width=pct+'%';
+  document.getElementById('globalPct').textContent=pct+'%';
+}
+
+function updateHeader() {
+  document.getElementById('currentDayLabel').textContent=DAYS[todayIndex].toUpperCase();
+  document.getElementById('dateDisplay').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.matches('.field-input')) addItem(activeDay); });
+
+</script>
+</body>
+</html>
