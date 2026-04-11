@@ -1162,13 +1162,9 @@ async function loadFromFirestore() {
         }
       });
     } else {
-      // First time: create from INITIAL
+      // Novo usuário: estado vazio
       state = { days:{}, weekStart: getWeekStart() };
-      DAYS.forEach(d => {
-        state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
-          id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
-        }));
-      });
+      DAYS.forEach(d => { state.days[d] = []; });
       await saveToFirestore();
     }
 
