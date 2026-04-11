@@ -6,18 +6,20 @@
 <title>MikeCycle</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+
   :root {
-    --bg: #0a0c10;
-    --surface: #11141c;
-    --surface2: #181c27;
-    --border: #1f2535;
-    --accent: #00e5a0;
-    --accent2: #0099ff;
-    --warn: #ff6b35;
-    --text: #e2e8f0;
-    --text-muted: #5a6380;
-    --checked: #1a2e20;
-    --checked-border: #00e5a0;
+    --bg: #0d0602;
+    --surface: #160b03;
+    --surface2: #1f1005;
+    --border: #3a1f08;
+    --accent: #E79022;
+    --accent2: #DF621C;
+    --warn: #DF621C;
+    --text: #f5e6d0;
+    --text-muted: #9a7050;
+    --text-dim: #7a5535;
+    --checked: #3a1f05;
+    --checked-border: #E79022;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -37,8 +39,8 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+      linear-gradient(rgba(231,144,34,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(231,144,34,0.04) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
@@ -311,6 +313,12 @@
   .day-tab.active { background: linear-gradient(135deg, rgba(0,229,160,0.12), rgba(0,153,255,0.08)); border-color: var(--accent); color: var(--accent); }
   .day-tab.today { position: relative; }
   .day-tab.today::after { content: '●'; position: absolute; top: -6px; right: -6px; font-size: 8px; color: var(--accent); }
+  .day-tab.treino { border-bottom: 2px solid var(--warn); }
+  .day-tab.plus { border-bottom: 2px dashed var(--accent2); }
+  .day-tab.plus .day-name::after { content: " +"; font-size: 10px; color: var(--accent2); }
+  .day-tab.cardio-done { position: relative; }
+  .day-tab.cardio-done::before { content: '🏃'; position: absolute; top: -8px; left: -4px; font-size: 10px; }
+  .day-tab.treino .day-name::after { content: " ⚡"; font-size: 10px; }
 
   .day-panel { display: none; }
   .day-panel.active { display: block; animation: fadeSlide 0.25s ease; }
@@ -377,6 +385,548 @@
   }
   .med-item:hover .delete-btn { opacity: 1; }
   .delete-btn:hover { background: rgba(255,80,80,0.15); color: #ff5050; }
+
+  .expand-btn {
+    width: 24px; height: 24px; border: none; background: none;
+    color: var(--text-muted); cursor: pointer; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: all 0.2s; flex-shrink: 0;
+  }
+  .expand-btn:hover { color: var(--accent2); }
+  .expand-btn.open { transform: rotate(180deg); color: var(--accent2); }
+
+  .med-description {
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    padding: 10px 14px;
+    margin: 0 18px 14px;
+    background: var(--surface2);
+    border-left: 2px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+    animation: fadeSlide 0.2s ease;
+  }
+  .med-description.open { display: block; }
+
+
+
+
+  /* ── REMÉDIOS SECTION ────────────────────────────────── */
+  .med-section { margin-bottom: 24px; }
+
+  .med-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .med-toggle:hover { border-color: rgba(0,229,160,0.4); }
+  .med-toggle.open { border-radius: var(--radius) var(--radius) 0 0; border-color: rgba(0,229,160,0.5); }
+
+  .med-toggle-left { display: flex; align-items: center; gap: 12px; }
+  .med-toggle-icon {
+    width: 32px; height: 32px;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .med-toggle-info { display: flex; flex-direction: column; gap: 2px; }
+  .med-toggle-title { font-size: 15px; font-weight: 700; }
+  .med-toggle-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); }
+  .med-chevron { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; }
+  .med-toggle.open .med-chevron { transform: rotate(180deg); }
+
+  .med-body {
+    display: none;
+    background: var(--surface);
+    border: 1px solid rgba(0,229,160,0.5);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 16px 18px;
+  }
+  .med-body.open { display: block; animation: fadeSlide 0.2s ease; }
+
+  /* ── TREINO ──────────────────────────────────────────── */
+  .treino-section { margin-bottom: 24px; }
+
+  .treino-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .treino-toggle:hover { border-color: rgba(255,107,53,0.4); }
+  .treino-toggle.open { border-radius: var(--radius) var(--radius) 0 0; border-color: rgba(255,107,53,0.5); }
+
+  .treino-toggle-left { display: flex; align-items: center; gap: 12px; }
+  .treino-toggle-icon {
+    width: 32px; height: 32px;
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .treino-toggle-info { display: flex; flex-direction: column; gap: 2px; }
+  .treino-toggle-title { font-size: 15px; font-weight: 700; }
+  .treino-toggle-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); }
+  .treino-chevron { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; }
+  .treino-toggle.open .treino-chevron { transform: rotate(180deg); }
+
+  .treino-body {
+    display: none;
+    background: var(--surface);
+    border: 1px solid rgba(255,107,53,0.5);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 16px 18px;
+  }
+  .treino-body.open { display: block; animation: fadeSlide 0.2s ease; }
+
+  /* Nome do treino */
+  .treino-nome-wrap {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .treino-nome-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .treino-nome-input:focus { border-color: var(--warn); }
+
+  .btn-save-nome {
+    background: var(--warn); color: #fff; border: none;
+    border-radius: var(--radius-sm); padding: 9px 14px;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-save-nome:hover { opacity: 0.85; }
+
+  /* Lista exercícios */
+  .ex-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+  .ex-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .ex-item:hover { border-color: rgba(255,107,53,0.3); }
+  .ex-item.done { background: rgba(255,107,53,0.06); border-color: rgba(255,107,53,0.4); opacity: 0.8; }
+
+  .ex-chk {
+    width: 18px; height: 18px;
+    border: 2px solid var(--text-muted);
+    border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .ex-item.done .ex-chk { background: var(--warn); border-color: var(--warn); }
+  .ex-chk svg { display: none; }
+  .ex-item.done .ex-chk svg { display: block; }
+
+  .ex-info { flex: 1; }
+  .ex-name { font-size: 13px; font-weight: 600; }
+  .ex-item.done .ex-name { text-decoration: line-through; color: var(--text-muted); }
+  .ex-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .ex-badge {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    padding: 2px 7px; border-radius: 4px; border: 1px solid;
+  }
+  .ex-badge.series { color: var(--warn); border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.06); }
+  .ex-badge.carga  { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
+
+  .ex-del { width:24px; height:24px; border:none; background:none; color:var(--text-muted); cursor:pointer; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; opacity:0; transition:all 0.15s; flex-shrink:0; }
+  .ex-item:hover .ex-del { opacity:1; }
+  .ex-del:hover { background:rgba(255,80,80,0.15); color:#ff5050; }
+
+  /* Progresso treino */
+  .ex-progress { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+  .ex-progress-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .ex-progress-fill { height:100%; background:var(--warn); border-radius:2px; transition:width 0.4s ease; }
+  .ex-progress-pct { font-family:'DM Mono',monospace; font-size:10px; color:var(--warn); min-width:36px; text-align:right; }
+
+  /* Add exercício */
+  .add-ex-section {
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .add-ex-section:focus-within { border-color: var(--warn); border-style: solid; }
+
+  .add-ex-title { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+
+  .add-ex-form { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px; align-items:end; }
+  @media(max-width:600px){ .add-ex-form { grid-template-columns:1fr 1fr; } .add-ex-btn { grid-column:span 2; } }
+
+  .add-ex-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .add-ex-input:focus { border-color: var(--warn); }
+
+  .add-ex-btn {
+    background: var(--warn); color: #fff; border: none;
+    border-radius: var(--radius-sm); padding: 8px 14px;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; height: 36px;
+  }
+  .add-ex-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Observações */
+  .treino-obs-wrap { margin-top: 4px; }
+  .treino-obs-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--warn); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; }
+  .treino-obs-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--warn);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.2s;
+  }
+  .treino-obs-input:focus { border-color: var(--warn); }
+
+
+  /* ── CRONÔMETRO ──────────────────────────────────────── */
+  .crono-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .crono-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    min-width: 90px;
+  }
+
+  .crono-display.running { color: var(--accent); }
+  .crono-display.warning { color: #fbbf24; }
+  .crono-display.danger  { color: var(--warn); animation: pulse 0.8s infinite; }
+
+  .crono-btns { display: flex; gap: 8px; margin-left: auto; }
+
+  .crono-btn {
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .crono-btn.start  { background: var(--accent); color: #000; }
+  .crono-btn.start:hover { background: #00ffb3; }
+  .crono-btn.pause  { background: #fbbf24; color: #000; }
+  .crono-btn.pause:hover { opacity: 0.85; }
+  .crono-btn.reset  { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+  .crono-btn.reset:hover { border-color: var(--warn); color: var(--warn); }
+
+  .crono-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── CARDIO ─────────────────────────────────────────── */
+  .cardio-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .cardio-row:hover { border-color: rgba(0,153,255,0.4); background: var(--surface2); }
+  .cardio-row.done { background: rgba(0,153,255,0.08); border-color: rgba(0,153,255,0.5); }
+
+  .cardio-checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--text-muted);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .cardio-row.done .cardio-checkbox { background: var(--accent2); border-color: var(--accent2); }
+  .cardio-checkbox svg { display: none; }
+  .cardio-row.done .cardio-checkbox svg { display: block; }
+
+  .cardio-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .cardio-row.done .cardio-label { color: var(--accent2); }
+
+  .cardio-tag {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,153,255,0.4);
+    color: var(--accent2);
+    background: rgba(0,153,255,0.08);
+  }
+
+
+
+  /* ── REMÉDIOS SECTION ────────────────────────────────── */
+
+  /* ── TREINO ──────────────────────────────────────────── */
+  .treino-section {
+    margin-bottom: 24px;
+  }
+
+  .treino-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .treino-header:hover { border-color: rgba(255,107,53,0.4); background: var(--surface2); }
+  .treino-header.open { border-radius: var(--radius) var(--radius) 0 0; border-bottom-color: transparent; border-color: rgba(255,107,53,0.5); }
+
+  .treino-header-left { display: flex; align-items: center; gap: 12px; }
+
+  .treino-icon {
+    width: 32px; height: 32px;
+    background: rgba(255,107,53,0.12);
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .treino-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .treino-title { font-size: 15px; font-weight: 700; }
+  .treino-subtitle { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.05em; }
+
+  .treino-chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .treino-header.open .treino-chevron { transform: rotate(180deg); }
+
+  .treino-body {
+    display: none;
+    background: var(--surface);
+    border: 1px solid rgba(255,107,53,0.5);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden;
+  }
+  .treino-body.open { display: block; animation: fadeSlide 0.2s ease; }
+
+  /* Seletor de ficha (dias Plus) */
+  .ficha-selector {
+    padding: 12px 18px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+  }
+  .treino-body:not(.open) ~ .treino-body { display: none; }
+  .ficha-selector + .treino-body.open { border-top: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); }
+
+  .ficha-selector select {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ficha-selector select:focus { border-color: var(--accent2); }
+  .ficha-selector option { background: var(--surface2); }
+
+  .btn-ficha {
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-ficha:hover { opacity: 0.85; }
+
+  /* Exercícios */
+  .exercicio-list { padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; }
+
+  .exercicio-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .exercicio-item:hover { border-color: rgba(255,107,53,0.3); }
+  .exercicio-item.done { background: rgba(255,107,53,0.06); border-color: rgba(255,107,53,0.4); opacity: 0.8; }
+
+  .ex-checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--text-muted);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .exercicio-item.done .ex-checkbox { background: var(--warn); border-color: var(--warn); }
+  .ex-checkbox svg { display: none; }
+  .exercicio-item.done .ex-checkbox svg { display: block; }
+
+  .ex-info { flex: 1; }
+  .ex-name { font-size: 13px; font-weight: 600; }
+  .exercicio-item.done .ex-name { text-decoration: line-through; color: var(--text-muted); }
+
+  .ex-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .ex-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .ex-badge.series  { border-color: rgba(255,107,53,0.4); color: var(--warn); background: rgba(255,107,53,0.06); }
+  .ex-badge.carga   { border-color: rgba(251,191,36,0.4); color: #fbbf24; background: rgba(251,191,36,0.06); }
+  .ex-badge.obs     { border-color: rgba(0,153,255,0.3); color: var(--accent2); background: rgba(0,153,255,0.06); }
+
+  /* Observações */
+  .treino-obs {
+    margin: 0 18px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--warn);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    white-space: pre-line;
+  }
+
+  .treino-obs-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--warn);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* Progress treino */
+  .treino-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .treino-progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .treino-progress-fill { height: 100%; background: var(--warn); border-radius: 2px; transition: width 0.4s ease; }
+  .treino-progress-pct { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warn); min-width: 30px; text-align: right; }
 
   .add-section { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); padding: 20px; transition: border-color 0.2s; }
   .add-section:focus-within { border-color: var(--accent); border-style: solid; }
@@ -473,9 +1023,11 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
 </style>
 </head>
 <body>
+
 
 <!-- LOGIN -->
 <div id="loginScreen">
@@ -552,6 +1104,11 @@
       <div class="rel-section-label">Semana atual — em andamento</div>
       <div class="med-adherence-list" id="currentAdherence"></div>
     </div>
+    <!-- Cardio semana atual -->
+    <div class="rel-current" style="margin-bottom:28px;">
+      <div class="rel-section-label">Cardio — semana atual</div>
+      <div id="cardioWeekSummary"></div>
+    </div>
     <div class="rel-section-label" style="margin-bottom:16px;">Histórico de semanas</div>
     <div class="history-list" id="historyList"></div>
   </div>
@@ -560,6 +1117,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -584,8 +1142,119 @@ const auth     = getAuth(app);
 const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// ── Firestore ─────────────────────────────────────────────
+function stateRef()   { return doc(db, 'users', uid, 'data', 'state'); }
+function historyRef() { return collection(db, 'users', uid, 'history'); }
+
+async function loadFromFirestore() {
+  showLoading(true);
+  try {
+    // Load state
+    const snap = await getDoc(stateRef());
+    if (snap.exists()) {
+      state = snap.data();
+      // Ensure all days exist
+      DAYS.forEach(d => {
+        if (!state.days[d]) {
+          state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
+            id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
+          }));
+        }
+      });
+    } else {
+      // First time: create from INITIAL
+      state = { days:{}, weekStart: getWeekStart() };
+      DAYS.forEach(d => {
+        state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
+          id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
+        }));
+      });
+      await saveToFirestore();
+    }
+
+    // Load history
+    const hSnap = await getDocs(historyRef());
+    history = [];
+    hSnap.forEach(d => history.push({ firestoreId: d.id, ...d.data() }));
+    history.sort((a,b) => a.weekStart > b.weekStart ? 1 : -1);
+
+    setSyncStatus('synced', 'Sincronizado');
+  } catch(e) {
+    setSyncStatus('error', 'Erro de sync');
+    console.error(e);
+  }
+  showLoading(false);
+}
+
+async function saveToFirestore() {
+  setSyncStatus('syncing', 'Salvando...');
+  try {
+    await setDoc(stateRef(), state);
+    setSyncStatus('synced', 'Sincronizado');
+  } catch(e) {
+    setSyncStatus('error', 'Erro ao salvar');
+    console.error(e);
+  }
+}
+
+// ── Auth ──
+// ── Auth ──────────────────────────────────────────────────
+window.loginGoogle = async function() {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    showToast('Erro ao fazer login');
+    console.error(e);
+  }
+};
+
+window.logoutGoogle = async function() {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    uid = user.uid;
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('appScreen').style.display    = 'block';
+    document.getElementById('userAvatar').src             = user.photoURL || '';
+    document.getElementById('userName').textContent       = user.displayName || user.email;
+    await loadFromFirestore();
+    render();
+  } else {
+    uid = null;
+    state = null;
+    history = [];
+    document.getElementById('loginScreen').style.display  = 'flex';
+    document.getElementById('appScreen').style.display    = 'none';
+    document.getElementById('loadingScreen').style.display= 'none';
+  }
+});
+
+function showLoading(show) {
+  document.getElementById('loadingScreen').style.display = show ? 'flex' : 'none';
+}
+
+// ── Switch view
+// ── App logic ─────────────────────────────────────────────
+
+
+
+
+
 // ── Constants ─────────────────────────────────────────────
 const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const PLUS_DAYS_LIST = ['Terça','Quarta','Quinta'];
+
+
+// ── Descrições dos remédios ───────────────────────────────
+const MED_DESC = {
+  'Anastrozol':            'Inibidor de aromatase — reduz a conversão de testosterona em estrogênio. Usado em protocolos de TRT e ciclos anabolizantes para controlar efeitos estrogênicos como retenção de água e ginecomastia.',
+  'ADDERAMAX':             'Suplemento termogênico e estimulante. Combina cafeína, extrato de chá verde e outros ativos para foco, energia e auxílio na queima de gordura.',
+  'LIVALO':                'Pitavastatina — estatina usada para reduzir o colesterol LDL e triglicerídeos. Tomado à noite porque a síntese de colesterol pelo fígado é maior nesse período, potencializando o efeito.',
+  'OXIMETOLONA + MITBURN': 'OXIMETOLONA: esteroide anabolizante oral de alta potência para ganho de massa e força. MITBURN: termogênico com L-carnitina, cafeína e extrato de pimenta, potencializa o gasto calórico durante o treino.',
+  'Durateston':            'Mistura de 4 ésteres de testosterona (propionato, fenilpropionato, isocaproato e decanoato). Usada em TRT e ciclos para elevar os níveis de testosterona, com liberação escalonada pelo organismo.',
+};
 
 const INITIAL = {
   'Segunda': [
@@ -658,99 +1327,9 @@ function setSyncStatus(status, label) {
   lbl.textContent = label;
 }
 
-// ── Firestore ─────────────────────────────────────────────
-function stateRef()   { return doc(db, 'users', uid, 'data', 'state'); }
-function historyRef() { return collection(db, 'users', uid, 'history'); }
 
-async function loadFromFirestore() {
-  showLoading(true);
-  try {
-    // Load state
-    const snap = await getDoc(stateRef());
-    if (snap.exists()) {
-      state = snap.data();
-      // Ensure all days exist
-      DAYS.forEach(d => {
-        if (!state.days[d]) {
-          state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
-            id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
-          }));
-        }
-      });
-    } else {
-      // First time: create from INITIAL
-      state = { days:{}, weekStart: getWeekStart() };
-      DAYS.forEach(d => {
-        state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
-          id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
-        }));
-      });
-      await saveToFirestore();
-    }
+// ── Switch view ──────────────────────────────────────────
 
-    // Load history
-    const hSnap = await getDocs(historyRef());
-    history = [];
-    hSnap.forEach(d => history.push({ firestoreId: d.id, ...d.data() }));
-    history.sort((a,b) => a.weekStart > b.weekStart ? 1 : -1);
-
-    setSyncStatus('synced', 'Sincronizado');
-  } catch(e) {
-    setSyncStatus('error', 'Erro de sync');
-    console.error(e);
-  }
-  showLoading(false);
-}
-
-async function saveToFirestore() {
-  setSyncStatus('syncing', 'Salvando...');
-  try {
-    await setDoc(stateRef(), state);
-    setSyncStatus('synced', 'Sincronizado');
-  } catch(e) {
-    setSyncStatus('error', 'Erro ao salvar');
-    console.error(e);
-  }
-}
-
-// ── Auth ──────────────────────────────────────────────────
-window.loginGoogle = async function() {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    showToast('Erro ao fazer login');
-    console.error(e);
-  }
-};
-
-window.logoutGoogle = async function() {
-  await signOut(auth);
-};
-
-onAuthStateChanged(auth, async user => {
-  if (user) {
-    uid = user.uid;
-    document.getElementById('loginScreen').style.display  = 'none';
-    document.getElementById('appScreen').style.display    = 'block';
-    document.getElementById('userAvatar').src             = user.photoURL || '';
-    document.getElementById('userName').textContent       = user.displayName || user.email;
-    await loadFromFirestore();
-    render();
-  } else {
-    uid = null;
-    state = null;
-    history = [];
-    document.getElementById('loginScreen').style.display  = 'flex';
-    document.getElementById('appScreen').style.display    = 'none';
-    document.getElementById('loadingScreen').style.display= 'none';
-  }
-});
-
-function showLoading(show) {
-  document.getElementById('loadingScreen').style.display = show ? 'flex' : 'none';
-}
-
-// ── Switch view ───────────────────────────────────────────
 window.switchView = function(view) {
   currentView = view;
   document.getElementById('viewAgenda').style.display    = view==='agenda'    ? 'block' : 'none';
@@ -773,8 +1352,300 @@ function buildAdherenceMap(days) {
 }
 
 // ── Relatório ─────────────────────────────────────────────
+
+
+
+
+// ── Cronômetro (regressivo 60s) ───────────────────────────
+const CRONO_START = 60;
+const cronoState = {};
+
+function cronoUpdate(day) {
+  const s  = cronoState[day];
+  const el = document.getElementById(`crono-display-${day}`);
+  const btn = document.getElementById(`crono-start-${day}`);
+  if (!el) { clearInterval(s.interval); s.running = false; return; }
+
+  const remaining = CRONO_START - s.seconds;
+  const m   = String(Math.floor(Math.abs(remaining) / 60)).padStart(2, '0');
+  const sec = String(Math.abs(remaining) % 60).padStart(2, '0');
+  el.textContent = remaining >= 0 ? `${m}:${sec}` : `-${m}:${sec}`;
+
+  if (remaining <= 0)      el.className = 'crono-display danger';
+  else if (remaining <= 15) el.className = 'crono-display warning';
+  else                      el.className = 'crono-display running';
+
+  if (remaining === 0) {
+    showToast('⏱ Descanso concluído!');
+  }
+}
+
+window.cronoToggle = function(day) {
+  if (!cronoState[day]) cronoState[day] = { seconds: 0, running: false, interval: null };
+  const s = cronoState[day];
+
+  if (s.running) {
+    clearInterval(s.interval);
+    s.running = false;
+    const btn = document.getElementById(`crono-start-${day}`);
+    if (btn) { btn.textContent = '▶ Continuar'; btn.className = 'crono-btn start'; }
+  } else {
+    s.running = true;
+    const btn = document.getElementById(`crono-start-${day}`);
+    if (btn) { btn.textContent = '⏸ Pausar'; btn.className = 'crono-btn pause'; }
+    s.interval = setInterval(() => {
+      s.seconds++;
+      cronoUpdate(day);
+    }, 1000);
+  }
+};
+
+window.cronoReset = function(day) {
+  if (cronoState[day]) {
+    clearInterval(cronoState[day].interval);
+    cronoState[day] = { seconds: 0, running: false, interval: null };
+  }
+  const el  = document.getElementById(`crono-display-${day}`);
+  const btn = document.getElementById(`crono-start-${day}`);
+  if (el)  { el.textContent = '01:00'; el.className = 'crono-display'; }
+  if (btn) { btn.textContent = '▶ Iniciar'; btn.className = 'crono-btn start'; }
+};
+
+// ── Med Section ───────────────────────────────────────────
+function renderMedSection(day) {
+  const el = document.getElementById(`med-sec-${day}`);
+  if (!el) return;
+
+  const items = state.days[day] || [];
+  const done  = items.filter(x => x.checked).length;
+  const total = items.length;
+  const isOpen = el.querySelector('.med-body.open') !== null;
+
+  const listHtml = !items.length
+    ? `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);padding:4px 0 12px;">Nenhum remédio cadastrado.</div>`
+    : items.map(item => {
+        const desc    = MED_DESC[item.name] || '';
+        const hasDesc = !!desc;
+        return `
+          <div style="margin-bottom:4px;">
+            <div class="med-item${item.checked ? ' checked' : ''}" onclick="toggleItem('${day}','${item.id}')">
+              <div class="med-checkbox">
+                <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="med-info">
+                <div class="med-name">${item.name}</div>
+                ${item.detail ? `<div class="med-detail">${item.detail}</div>` : ''}
+              </div>
+              <span class="med-tag tag-${item.tag}">${tagLabel(item.tag)}</span>
+              ${hasDesc ? `<button class="expand-btn" title="Ver descrição" onclick="toggleDesc(this,event)">▾</button>` : ''}
+              <button class="delete-btn" title="Remover" onclick="removeItem('${day}','${item.id}',event)">×</button>
+            </div>
+            ${hasDesc ? `<div class="med-description">${desc}</div>` : ''}
+          </div>`;
+      }).join('');
+
+  el.innerHTML = `
+    <div class="med-toggle${isOpen ? ' open' : ''}" onclick="toggleMedBody('${day}')">
+      <div class="med-toggle-left">
+        <div class="med-toggle-icon">💊</div>
+        <div class="med-toggle-info">
+          <div class="med-toggle-title">Remédios</div>
+          <div class="med-toggle-sub">${done}/${total} tomados hoje</div>
+        </div>
+      </div>
+      <span class="med-chevron">▾</span>
+    </div>
+    <div class="med-body${isOpen ? ' open' : ''}">
+      <div class="med-list" id="list-${day}" style="margin-bottom:16px;">${listHtml}</div>
+      <div class="add-section" style="margin-bottom:0;">
+        <div class="add-title">+ Adicionar remédio</div>
+        <div class="add-form">
+          <div class="field-group"><label class="field-label">Nome</label><input class="field-input" id="inp-name-${day}" placeholder="Ex: Vitamina D" /></div>
+          <div class="field-group"><label class="field-label">Detalhe</label><input class="field-input" id="inp-detail-${day}" placeholder="Ex: Manhã, Noite..." /></div>
+          <div class="field-group"><label class="field-label">Tipo</label>
+            <select class="field-select" id="inp-tag-${day}">
+              <option value="standard">Padrão</option>
+              <option value="manha">Manhã</option>
+              <option value="noite">Noite</option>
+              <option value="cafe">Após café</option>
+              <option value="treino">Treino</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="addItem('${day}')">Adicionar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+window.toggleMedBody = function(day) {
+  const toggle = document.querySelector(`#med-sec-${day} .med-toggle`);
+  const body   = document.querySelector(`#med-sec-${day} .med-body`);
+  if (!toggle || !body) return;
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+};
+
+// ── Treino functions ──────────────────────────────────────
+function renderTreinoDay(day) {
+  const el = document.getElementById(`treino-sec-${day}`);
+  if (!el) return;
+
+  if (!state.treino) state.treino = {};
+  const t = state.treino[day] || { nome: '', exercicios: [], obs: '' };
+  const done  = t.exercicios.filter(e => e.done).length;
+  const total = t.exercicios.length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
+  const isOpen = el.querySelector('.treino-body.open') !== null;
+
+  const exItems = t.exercicios.map((ex, i) => `
+    <div class="ex-item${ex.done ? ' done' : ''}" onclick="toggleEx('${day}',${i})">
+      <div class="ex-chk">
+        <svg width="10" height="8" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.nome}</div>
+        <div class="ex-badges">
+          <span class="ex-badge series">${ex.series}</span>
+          <span class="ex-badge carga">⚖ ${ex.carga}</span>
+        </div>
+      </div>
+      <button class="ex-del" onclick="delEx('${day}',${i},event)">×</button>
+    </div>`).join('');
+
+  const progressHtml = total ? `
+    <div class="ex-progress">
+      <div class="ex-progress-bar"><div class="ex-progress-fill" style="width:${pct}%"></div></div>
+      <div class="ex-progress-pct">${done}/${total} exercícios</div>
+    </div>` : '';
+
+  el.innerHTML = `
+    <div class="treino-toggle${isOpen ? ' open' : ''}" onclick="toggleTreinoBody('${day}')">
+      <div class="treino-toggle-left">
+        <div class="treino-toggle-icon">🏋️</div>
+        <div class="treino-toggle-info">
+          <div class="treino-toggle-title">${t.nome || 'Treino do dia'}</div>
+          <div class="treino-toggle-sub">${total ? `${done}/${total} exercícios` : 'Toque para montar o treino'}</div>
+        </div>
+      </div>
+      <span class="treino-chevron">▾</span>
+    </div>
+    <div class="treino-body${isOpen ? ' open' : ''}">
+
+      <div class="cardio-row${state.cardio && state.cardio[day] ? ' done' : ''}" onclick="toggleCardio('${day}')" style="margin-bottom:16px;">
+        <div class="cardio-checkbox">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span class="cardio-label">Cardio realizado hoje</span>
+        <span class="cardio-tag">CARDIO</span>
+      </div>
+
+      <div class="crono-wrap" id="crono-wrap-${day}">
+        <div>
+          <div class="crono-display" id="crono-display-${day}">01:00</div>
+          <div class="crono-label">Descanso</div>
+        </div>
+        <div class="crono-btns">
+          <button class="crono-btn start" id="crono-start-${day}" onclick="cronoToggle('${day}')">▶ Iniciar</button>
+          <button class="crono-btn reset" onclick="cronoReset('${day}')">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="treino-nome-wrap">
+        <input class="treino-nome-input" id="treino-nome-${day}" placeholder="Nome do treino (ex: Peito e Bíceps)" value="${t.nome || ''}" />
+        <button class="btn-save-nome" onclick="saveNomeTreino('${day}')">Salvar</button>
+      </div>
+
+      ${progressHtml}
+      <div class="ex-list">${exItems}</div>
+
+      <div class="add-ex-section">
+        <div class="add-ex-title">+ Adicionar exercício</div>
+        <div class="add-ex-form">
+          <div class="field-group">
+            <label class="field-label">Exercício</label>
+            <input class="add-ex-input" id="ex-nome-${day}" placeholder="Ex: Supino reto" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Séries × Reps</label>
+            <input class="add-ex-input" id="ex-series-${day}" placeholder="Ex: 4x12" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Carga</label>
+            <input class="add-ex-input" id="ex-carga-${day}" placeholder="Ex: 80kg" />
+          </div>
+          <button class="add-ex-btn" onclick="addEx('${day}')">+</button>
+        </div>
+      </div>
+
+      <div class="treino-obs-wrap">
+        <div class="treino-obs-label">Observações</div>
+        <textarea class="treino-obs-input" id="treino-obs-${day}" placeholder="Ex: Descanso 60s, foco na contração..." onblur="saveObsTreino('${day}')">${t.obs || ''}</textarea>
+      </div>
+    </div>`;
+}
+
+window.toggleTreinoBody = function(day) {
+  const toggle = document.querySelector(`#treino-sec-${day} .treino-toggle`);
+  const body   = document.querySelector(`#treino-sec-${day} .treino-body`);
+  if (!toggle || !body) return;
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+};
+
+window.saveNomeTreino = function(day) {
+  if (!state.treino) state.treino = {};
+  if (!state.treino[day]) state.treino[day] = { nome:'', exercicios:[], obs:'' };
+  state.treino[day].nome = document.getElementById(`treino-nome-${day}`).value.trim();
+  saveState();
+  renderTreinoDay(day);
+  showToast('Nome salvo!');
+};
+
+window.saveObsTreino = function(day) {
+  if (!state.treino) state.treino = {};
+  if (!state.treino[day]) state.treino[day] = { nome:'', exercicios:[], obs:'' };
+  state.treino[day].obs = document.getElementById(`treino-obs-${day}`).value;
+  saveState();
+};
+
+window.addEx = function(day) {
+  const nEl = document.getElementById(`ex-nome-${day}`);
+  const sEl = document.getElementById(`ex-series-${day}`);
+  const cEl = document.getElementById(`ex-carga-${day}`);
+  const nome = nEl.value.trim();
+  if (!nome) { nEl.focus(); return; }
+  if (!state.treino) state.treino = {};
+  if (!state.treino[day]) state.treino[day] = { nome:'', exercicios:[], obs:'' };
+  state.treino[day].exercicios.push({
+    nome, series: sEl.value.trim() || '—', carga: cEl.value.trim() || '—', done: false
+  });
+  nEl.value=''; sEl.value=''; cEl.value='';
+  saveState();
+  renderTreinoDay(day);
+  showToast(`+ ${nome} adicionado`);
+};
+
+window.toggleEx = function(day, idx) {
+  if (!state.treino || !state.treino[day]) return;
+  state.treino[day].exercicios[idx].done = !state.treino[day].exercicios[idx].done;
+  saveState();
+  renderTreinoDay(day);
+};
+
+window.delEx = function(day, idx, e) {
+  e.stopPropagation();
+  if (!state.treino || !state.treino[day]) return;
+  state.treino[day].exercicios.splice(idx, 1);
+  saveState();
+  renderTreinoDay(day);
+  showToast('Exercício removido');
+};
+
 function renderRelatorio() {
   if (!state) return;
+
+  // Cardio summary
+  renderCardioSummary();
 
   // Semana atual
   const el  = document.getElementById('currentAdherence');
@@ -909,7 +1780,14 @@ function renderTabs() {
   DAYS.forEach((day,idx)=>{
     const items=state.days[day]||[], done=items.filter(x=>x.checked).length;
     const tab=document.createElement('div');
-    tab.className='day-tab'+(day===activeDay?' active':'')+(idx===todayIndex?' today':'');
+    
+
+
+const PLUS_DAYS = ['Terça','Quarta','Quinta'];
+    const isTreino = (state.days[day]||[]).some(x => x.tag === 'treino');
+    const isPlus = !isTreino && PLUS_DAYS.includes(day);
+    const cardioFeito = state.cardio && state.cardio[day];
+    tab.className='day-tab'+(day===activeDay?' active':'')+(idx===todayIndex?' today':'')+(isTreino?' treino':'')+(isPlus?' plus':'')+(cardioFeito?' cardio-done':'');
     const dots=items.slice(0,5).map(i=>`<div class="dot" style="${i.checked?'background:var(--accent)':''}"></div>`).join('');
     tab.innerHTML=`<span class="day-name">${day.substring(0,3).toUpperCase()}</span><div class="day-dots">${dots||'<div class="dot"></div>'}</div>`;
     tab.title=`${done}/${items.length} concluídos`;
@@ -931,57 +1809,72 @@ function renderPanels() {
         <div class="day-title">${day}</div>
         <div class="day-count">${done} / ${items.length} tomados</div>
       </div>
-      <div class="med-list" id="list-${day}"></div>
-      <div class="add-section">
-        <div class="add-title">+ Adicionar remédio</div>
-        <div class="add-form">
-          <div class="field-group"><label class="field-label">Nome</label><input class="field-input" id="inp-name-${day}" placeholder="Ex: Vitamina D" /></div>
-          <div class="field-group"><label class="field-label">Detalhe</label><input class="field-input" id="inp-detail-${day}" placeholder="Ex: Manhã, Noite..." /></div>
-          <div class="field-group"><label class="field-label">Tipo</label>
-            <select class="field-select" id="inp-tag-${day}">
-              <option value="standard">Padrão</option>
-              <option value="manha">Manhã</option>
-              <option value="noite">Noite</option>
-              <option value="cafe">Após café</option>
-              <option value="treino">Treino</option>
-            </select>
-          </div>
-          <button class="btn-add" onclick="addItem('${day}')">Adicionar</button>
-        </div>
-      </div>
+      <div class="med-section" id="med-sec-${day}"></div>
+      <div class="treino-section" id="treino-sec-${day}"></div>
       <div class="day-actions"><button class="btn-reset" onclick="resetDay('${day}')">↺ Resetar dia</button></div>`;
 
     container.appendChild(panel);
-
-    const listEl=document.getElementById(`list-${day}`);
-    if (!items.length) {
-      listEl.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);padding:12px 0;">Nenhum remédio cadastrado.</div>`;
-    } else {
-      items.forEach(item=>{
-        const el=document.createElement('div');
-        el.className='med-item'+(item.checked?' checked':'');
-        el.innerHTML=`
-          <div class="med-checkbox">
-            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="med-info">
-            <div class="med-name">${item.name}</div>
-            ${item.detail?`<div class="med-detail">${item.detail}</div>`:''}
-          </div>
-          <span class="med-tag tag-${item.tag}">${tagLabel(item.tag)}</span>
-          <button class="delete-btn" title="Remover" onclick="removeItem('${day}','${item.id}',event)">×</button>`;
-        el.addEventListener('click',()=>toggleItem(day,item.id));
-        listEl.appendChild(el);
-      });
-    }
+    renderMedSection(day);
+    renderTreinoDay(day);
   });
 }
+
+function renderCardioSummary() {
+  const el = document.getElementById('cardioWeekSummary');
+  if (!el) return;
+  const cardio = state.cardio || {};
+  const total = DAYS.length;
+  const done  = DAYS.filter(d => cardio[d]).length;
+  const pct   = Math.round((done / total) * 100);
+  const color = done >= 5 ? 'var(--accent)' : done >= 3 ? '#fbbf24' : 'var(--warn)';
+
+  const dayDots = DAYS.map(d => {
+    const feito = cardio[d];
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="width:32px;height:32px;border-radius:50%;border:2px solid ${feito ? 'var(--accent2)' : 'var(--border)'};background:${feito ? 'rgba(0,153,255,0.15)' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:14px;">
+        ${feito ? '🏃' : ''}
+      </div>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);">${d.substring(0,3).toUpperCase()}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:36px;font-weight:700;color:${color};">${done}<span style="font-size:16px;color:var(--text-muted);">/${total}</span></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;">dias com cardio</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:2px;">${pct}% da semana</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between;">${dayDots}</div>
+  `;
+}
+
+window.toggleCardio = function(day) {
+  if (!state.cardio) state.cardio = {};
+  state.cardio[day] = !state.cardio[day];
+  saveState();
+  renderTreinoDay(day);
+  renderTabs();
+  if (currentView === 'relatorio') renderCardioSummary();
+  showToast(state.cardio[day] ? '🏃 Cardio registrado!' : 'Cardio desmarcado');
+};
+
+window.toggleDesc = function(btn, e) {
+  e.stopPropagation();
+  const descEl = btn.closest(".med-item").nextElementSibling;
+  if (!descEl) return;
+  descEl.classList.toggle("open");
+  btn.classList.toggle("open");
+};
 
 window.toggleItem = async function(day, id) {
   const item=state.days[day].find(x=>x.id===id);
   if(!item) return;
   item.checked=!item.checked;
-  render();
+  renderMedSection(day);
+  renderTabs();
+  updateGlobalProgress();
   await saveToFirestore();
   if(item.checked) showToast(`✓ ${item.name} marcado`);
 };
@@ -989,7 +1882,9 @@ window.toggleItem = async function(day, id) {
 window.removeItem = async function(day, id, e) {
   e.stopPropagation();
   state.days[day]=state.days[day].filter(x=>x.id!==id);
-  render();
+  renderMedSection(day);
+  renderTabs();
+  updateGlobalProgress();
   await saveToFirestore();
   showToast('Remédio removido');
 };
@@ -1000,7 +1895,9 @@ window.addItem = async function(day) {
   if(!name){ nEl.focus(); return; }
   state.days[day].push({ id:`${day}-${Date.now()}`, name, detail:dEl.value.trim(), tag:tEl.value, checked:false });
   nEl.value=''; dEl.value=''; tEl.value='standard';
-  render();
+  renderMedSection(day);
+  renderTabs();
+  updateGlobalProgress();
   await saveToFirestore();
   showToast(`+ ${name} adicionado`);
 };
@@ -1034,6 +1931,7 @@ function showToast(msg) {
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.matches('.field-input')) addItem(activeDay); });
+
 
 </script>
 </body>
