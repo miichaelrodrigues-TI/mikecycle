@@ -1585,7 +1585,7 @@ function renderTreinoDay(day) {
           <span class="ex-badge carga">⚖ ${ex.carga}</span>
         </div>
       </div>
-      <button class="ex-del" onclick="delEx('${day}',${i},event)">×</button>
+      <button class="ex-del" onclick="event.stopPropagation();delEx('${day}',${i},event)">×</button>
     </div>`).join('');
 
   const progressHtml = total ? `
@@ -1702,7 +1702,10 @@ window.addEx = function(day) {
 };
 
 window.toggleEx = function(day, idx) {
-  if (!state.treino || !state.treino[day]) return;
+  if (!state.treino) state.treino = {};
+  if (!state.treino[day]) state.treino[day] = { nome:'', exercicios:[], obs:'' };
+  if (!state.treino[day].exercicios) state.treino[day].exercicios = [];
+  if (!state.treino[day].exercicios[idx]) return;
   state.treino[day].exercicios[idx].done = !state.treino[day].exercicios[idx].done;
   saveState();
   renderTreinoDay(day);
