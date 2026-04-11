@@ -1178,6 +1178,25 @@ async function loadFromFirestore() {
     hSnap.forEach(d => history.push({ firestoreId: d.id, ...d.data() }));
     history.sort((a,b) => a.weekStart > b.weekStart ? 1 : -1);
 
+    // Pré-carregar fichas nos dias definidos
+    const FICHAS_DIAS = {
+      'Sábado':  'Ombro + Tríceps',
+      'Domingo': 'Costas + Abdômen',
+      'Segunda': 'Ombro + Tríceps',
+    };
+    if (!state.treino) state.treino = {};
+    Object.entries(FICHAS_DIAS).forEach(([day, ficha]) => {
+      if (!state.treino[day]) {
+        state.treino[day] = { nome: ficha, exercicios: [], obs: '' };
+      }
+      if (!state.treino[day].nome) state.treino[day].nome = ficha;
+      if (state.treino[day].exercicios.length === 0 && FICHAS[ficha]) {
+        state.treino[day].exercicios = FICHAS[ficha].exercicios.map(ex => ({
+          nome: ex.nome, series: ex.series, carga: ex.carga, done: false
+        }));
+        state.treino[day].obs = FICHAS[ficha].obs || '';
+      }
+    });
     setSyncStatus('synced', 'Sincronizado');
   } catch(e) {
     setSyncStatus('error', 'Erro de sync');
@@ -1190,6 +1209,25 @@ async function saveToFirestore() {
   setSyncStatus('syncing', 'Salvando...');
   try {
     await setDoc(stateRef(), state);
+    // Pré-carregar fichas nos dias definidos
+    const FICHAS_DIAS = {
+      'Sábado':  'Ombro + Tríceps',
+      'Domingo': 'Costas + Abdômen',
+      'Segunda': 'Ombro + Tríceps',
+    };
+    if (!state.treino) state.treino = {};
+    Object.entries(FICHAS_DIAS).forEach(([day, ficha]) => {
+      if (!state.treino[day]) {
+        state.treino[day] = { nome: ficha, exercicios: [], obs: '' };
+      }
+      if (!state.treino[day].nome) state.treino[day].nome = ficha;
+      if (state.treino[day].exercicios.length === 0 && FICHAS[ficha]) {
+        state.treino[day].exercicios = FICHAS[ficha].exercicios.map(ex => ({
+          nome: ex.nome, series: ex.series, carga: ex.carga, done: false
+        }));
+        state.treino[day].obs = FICHAS[ficha].obs || '';
+      }
+    });
     setSyncStatus('synced', 'Sincronizado');
   } catch(e) {
     setSyncStatus('error', 'Erro ao salvar');
