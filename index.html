@@ -1284,6 +1284,48 @@ function showLoading(show) {
 const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const PLUS_DAYS_LIST = ['Terça','Quarta','Quinta'];
 
+const FICHAS = {
+  'Ombro + Tríceps': {
+    exercicios: [
+      { nome: 'Desenvolvimento Arnold Sentado',     series: '4x12',   carga: 'A definir' },
+      { nome: 'Elevação Frontal Alternada',          series: '4x15',   carga: 'A definir' },
+      { nome: 'Desenvolvimento com Barra Reta',      series: '3x15',   carga: 'A definir' },
+      { nome: 'Desenvolvimento no Smith',            series: '3x10',   carga: '50 kg'     },
+      { nome: 'Tríceps Francês com Halteres',        series: '3x12',   carga: '20 kg'     },
+      { nome: 'Tríceps na Polia com Barra W',        series: '5x15',   carga: 'A definir' },
+      { nome: 'Tríceps Paralelas no Gráviton',       series: '4x12',   carga: 'A definir' },
+      { nome: 'Bi-set A: Tríceps na Polia c/ Corda', series: '3x12',   carga: 'A definir' },
+      { nome: 'Bi-set B: Tríceps Testa na Polia',    series: '3x15',   carga: 'Reduzir ao longo' },
+    ],
+    obs: 'Descanso: 60s entre séries\nBi-set sem descanso entre A e B\nFoco: hipertrofia'
+  },
+  'Peito + Bíceps': {
+    exercicios: [
+      { nome: 'Supino Máquina Inclinado (Pronada)',   series: '5x(12+12 drop)',    carga: '89 kg → 54 kg' },
+      { nome: 'Peck Deck',                            series: '3x(8+iso10s+10)',   carga: 'A definir'     },
+      { nome: 'Flexão de Braços',                     series: '4x20',              carga: 'Peso corporal' },
+      { nome: 'Supino Reto no Smith',                 series: '4x12',              carga: '30 kg'         },
+      { nome: 'Rosca Alternada com Halteres',         series: '4x12',              carga: 'A definir'     },
+      { nome: 'Rosca Direta com Barra H',             series: '5x12',              carga: 'A definir'     },
+      { nome: 'Rosca Direta na Polia Baixa c/ Corda', series: '4x(10+10+10 drop)', carga: 'A definir'     },
+    ],
+    obs: 'Descanso: 60s\nTécnicas: drop set, isometria e pausa\nFoco: hipertrofia / resistência muscular'
+  },
+  'Costas + Abdômen': {
+    exercicios: [
+      { nome: 'Puxada Aberta com Barra Reta',         series: '3x15',   carga: 'A definir'     },
+      { nome: 'Barra Fixa (Pegada Aberta)',            series: '3x máx', carga: 'Peso corporal' },
+      { nome: 'Remada na Máquina (Pronada)',           series: '4x12',   carga: 'A definir'     },
+      { nome: 'Pulldown com Corda',                    series: '3x15-20',carga: 'A definir'     },
+      { nome: 'Remada Unilateral c/ Halter (Serrote)', series: '4x12',   carga: 'A definir'     },
+      { nome: 'Remada Baixa (Pegada Pronada)',         series: '3x15',   carga: 'A definir'     },
+      { nome: 'Abdominal na Máquina',                 series: '4x30',   carga: 'A definir'     },
+    ],
+    obs: 'Descanso: 60s\nFoco: dorsais (largura + espessura) e resistência\nPriorizar execução controlada'
+  },
+};
+
+
 
 // ── Descrições dos remédios ───────────────────────────────
 const MED_DESC = {
