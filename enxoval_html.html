@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enxoval do Oliver</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F5F9F7;
+    min-height: 100vh;
+    color: #1a1a1a;
+  }
+
+  .container { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+  /* Login */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
+    border: 0.5px solid #d0e8df; text-align: center; max-width: 340px; width: 90%;
+  }
+  .login-card .icon { font-size: 40px; margin-bottom: 12px; }
+  .login-card h2 { font-size: 20px; font-weight: 500; color: #085041; margin-bottom: 4px; }
+  .login-card p  { font-size: 13px; color: #5a7a70; margin-bottom: 1.5rem; }
+  .login-card .erro { font-size: 12px; color: #A32D2D; background: #FCEBEB; padding: 8px 12px; border-radius: 8px; margin-bottom: 1rem; display: none; }
+  .btn-google {
+    width: 100%; padding: 10px 0; border-radius: 10px; border: none;
+    background: #1D9E75; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+
+  /* Header */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; }
+  .header-left p  { font-size: 13px; color: #5a7a70; margin-bottom: 2px; }
+  .header-left h1 { font-size: 22px; font-weight: 500; color: #085041; }
+  .header-right   { display: flex; align-items: center; gap: 8px; }
+  .header-right img { width: 32px; height: 32px; border-radius: 50%; }
+  .btn-sair {
+    background: none; border: 0.5px solid #c5d9d0; border-radius: 8px;
+    padding: 4px 10px; font-size: 12px; color: #5a7a70; cursor: pointer;
+  }
+
+  /* Métricas */
+  .metricas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .metrica  { background: #fff; border-radius: 10px; padding: 12px 14px; border: 0.5px solid #d0e8df; }
+  .metrica .label { font-size: 11px; color: #5a7a70; margin-bottom: 6px; }
+  .metrica .val   { font-size: 17px; font-weight: 500; color: #085041; margin-bottom: 2px; }
+  .metrica .sub   { font-size: 11px; color: #5a7a70; }
+
+  /* Barra */
+  .barra-wrap { height: 6px; border-radius: 99px; background: #d0e8df; overflow: hidden; margin-bottom: 1.75rem; }
+  .barra-fill { height: 100%; background: #1D9E75; border-radius: 99px; transition: width 0.4s ease; }
+
+  /* Filtros */
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
+  .filtro-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 99px; font-size: 12px; cursor: pointer;
+    background: transparent; color: #5a7a70; border: 0.5px solid #c5d9d0;
+    font-family: inherit;
+  }
+  .filtro-btn.ativo { background: #fff; color: #085041; border-color: #1D9E75; font-weight: 500; }
+  .filtro-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .filtro-sep { width: 0.5px; height: 18px; background: #c5d9d0; margin: 0 2px; }
+
+  /* Lista */
+  .lista { display: flex; flex-direction: column; }
+  .item-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+  .item-sep  { height: 0.5px; background: #d0e8df; }
+
+  .status-btn {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid #E24B4A; background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .status-btn.temos { border-color: #1D9E75; background: #1D9E75; }
+  .status-btn.temos::after { content: "✓"; color: #fff; font-size: 12px; font-weight: 700; }
+
+  .item-info { flex: 1; min-width: 0; }
+  .item-nome { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+  .item-nome.riscado { color: #5a7a70; text-decoration: line-through; }
+  .item-tags { display: flex; gap: 8px; margin-top: 3px; flex-wrap: wrap; align-items: center; }
+  .item-tag  { font-size: 11px; padding: 1px 8px; border-radius: 99px; }
+  .tag-presente { background: #FBEAF0; color: #72243E; }
+
+  .item-acoes { display: flex; gap: 2px; flex-shrink: 0; }
+  .btn-acao { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 6px; }
+
+  /* Edição inline */
+  .edit-box {
+    margin-bottom: 8px; padding: 14px; background: #fff;
+    border: 0.5px solid #d0e8df; border-radius: 10px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .edit-box label { font-size: 12px; color: #5a7a70; display: block; margin-bottom: 4px; }
+  .edit-box input, .edit-box select {
+    padding: 6px 10px; border-radius: 8px; border: 0.5px solid #c5d9d0;
+    background: #fff; color: #1a1a1a; font-size: 14px; width: 100%;
+    font-family: inherit;
+  }
+  .edit-box .full { grid-column: 1 / -1; }
+  .edit-box .presente-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .edit-box .presente-row label { margin: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .btn-salvar {
+    grid-column: 1 / -1; padding: 7px 0; border-radius: 8px;
+    border: 0.5px solid #1D9E75; background: #E1F5EE; color: #085041;
+    font-weight: 500; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+
+  /* Adicionar */
+  .btn-adicionar {
+    width: 100%; padding: 10px 0; border-radius: 10px;
+    border: 0.5px dashed #a0c4b8; background: transparent;
+    color: #5a7a70; font-size: 14px; cursor: pointer; margin-top: 1rem;
+    font-family: inherit;
+  }
+  .add-box {
+    margin-top: 1rem; background: #fff; border-radius: 10px; padding: 14px;
+    border: 0.5px solid #d0e8df; display: flex; flex-direction: column; gap: 10px;
+  }
+  .add-box .grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+  .add-box .grid2b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .add-box label { font-size: 12px; color: #5a7a70; display: block; margin-bottom: 4px; }
+  .add-box input, .add-box select {
+    padding: 6px 10px; border-radius: 8px; border: 0.5px solid #c5d9d0;
+    background: #fff; color: #1a1a1a; font-size: 14px; width: 100%;
+    font-family: inherit;
+  }
+  .add-box .presente-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .add-box .presente-row label { margin: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #5a7a70; }
+  .add-acoes { display: flex; gap: 8px; }
+  .btn-confirmar {
+    flex: 1; padding: 9px 0; border-radius: 8px; border: none;
+    background: #1D9E75; color: #fff; font-weight: 500; font-size: 14px;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn-confirmar:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-cancelar {
+    padding: 9px 16px; border-radius: 8px; border: 0.5px solid #c5d9d0;
+    background: transparent; color: #5a7a70; font-size: 14px; cursor: pointer;
+    font-family: inherit;
+  }
+
+  .rodape { text-align: center; font-size: 12px; color: #5a7a70; margin-top: 1.5rem; }
+
+  #app { display: none; }
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="icon">🍼</div>
+    <h2>Enxoval do Oliver</h2>
+    <p>Acesso restrito à família</p>
+    <div class="erro" id="erro-login">Esse e-mail não tem acesso. Fale com Michael.</div>
+    <button class="btn-google" onclick="fazerLogin()">Entrar com Google</button>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <p>Chegando em breve · Rio de Janeiro</p>
+        <h1>Enxoval do Oliver</h1>
+      </div>
+      <div class="header-right">
+        <img id="user-foto" src="" alt="">
+        <button class="btn-sair" onclick="fazerLogout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="metricas">
+      <div class="metrica"><div class="label">Progresso</div><div class="val" id="m-pct">0%</div><div class="sub" id="m-sub">0 de 0 itens</div></div>
+      <div class="metrica"><div class="label">Total gasto</div><div class="val" id="m-gasto">R$ 0</div><div class="sub">por vocês</div></div>
+      <div class="metrica"><div class="label">Em presentes</div><div class="val" id="m-presentes">R$ 0</div><div class="sub">de familiares</div></div>
+    </div>
+
+    <div class="barra-wrap"><div class="barra-fill" id="barra" style="width:0%"></div></div>
+
+    <div class="filtros" id="filtros"></div>
+
+    <div class="lista" id="lista"></div>
+
+    <button class="btn-adicionar" onclick="abrirAdicionar()">+ Adicionar item</button>
+
+    <div class="add-box" id="add-box" style="display:none">
+      <div class="grid2">
+        <div><label>Nome do item</label><input id="add-nome" placeholder="Ex: Fraldas"></div>
+        <div><label>Quantidade</label><input id="add-qty" type="number" min="1" value="1"></div>
+      </div>
+      <div class="grid2b">
+        <div><label>Categoria</label>
+          <select id="add-cat"></select>
+        </div>
+        <div><label>Valor (R$)</label><input id="add-valor" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="presente-row">
+        <label><input type="checkbox" id="add-presente" onchange="toggleAddPresente()"> É presente?</label>
+        <input id="add-presenteDe" placeholder="De quem?" style="display:none;flex:1;min-width:120px;padding:6px 10px;border-radius:8px;border:0.5px solid #c5d9d0;font-size:14px;font-family:inherit;">
+      </div>
+      <div class="add-acoes">
+        <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarAdicionar()">Adicionar</button>
+        <button class="btn-cancelar" onclick="fecharAdicionar()">Cancelar</button>
+      </div>
+    </div>
+
+    <p class="rodape">Oliver está chegando! 🤍</p>
+  </div>
+</div>
+
+<!-- Firebase SDKs via CDN -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ─────────────────────────────────────────────
+// ⚠️ COLE AQUI AS SUAS CHAVES DO FIREBASE
+// ─────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyADUAqt09VqHHvDspQydlEVUZSZmYYL31g",
+  authDomain:        "mikecycle-a96e8.firebaseapp.com",
+  projectId:         "mikecycle-a96e8",
+  storageBucket:     "mikecycle-a96e8.firebasestorage.app",
+  messagingSenderId: "53041455968",
+  appId:             "1:53041455968:web:7d3bcb2f80c2b3a46d7405",
+};
+
+// ─────────────────────────────────────────────
+// ⚠️ COLE AQUI OS E-MAILS PERMITIDOS
+// ─────────────────────────────────────────────
+const EMAILS_PERMITIDOS = [
+  "miichaelrodrigues@gmail.com",
+  "camilacorrea.to@gmail.com",
+];
+
+// ─────────────────────────────────────────────
+
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
+const db       = getFirestore(app);
+
+const CATEGORIAS = {
+  "Roupinhas":            { emoji: "👕", cor: "#E1F5EE", corText: "#085041" },
+  "Higiene & Saúde":      { emoji: "🛁", cor: "#E6F1FB", corText: "#0C447C" },
+  "Quarto & Berço":       { emoji: "🛏️", cor: "#EEEDFE", corText: "#3C3489" },
+  "Alimentação":          { emoji: "🍼", cor: "#FAEEDA", corText: "#633806" },
+  "Passeio & Transporte": { emoji: "🚗", cor: "#FAECE7", corText: "#712B13" },
+  "Brinquedos & Lazer":   { emoji: "🧸", cor: "#FBEAF0", corText: "#72243E" },
+};
+
+const ITENS_INICIAIS = [
+  { cat: "Higiene & Saúde",      nome: "Creme para assaduras - uso diário (454g) - DESTIN",           qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Creme para assaduras - emergência (454g) - A+D",              qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Pomada para febre (patch) - Frida Baby",                      qty: 10, valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Aspirador nasal - Frida Baby",                                qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Gel de dentição com aplicador estilo chupeta - Dr. Talbot's", qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Creme para mamilos rachados - Lanolin",                       qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Higiene & Saúde",      nome: "Lenços nasais",                                               qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Colher de cabo longo com suporte - Vicks",                    qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Mamadeira de silicone - Comotomo",                            qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Prato de sucção",                                             qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Copo de transição - Munchkin",                                qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Potes herméticos para papinha - Facldi",                      qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Alimentação",          nome: "Bomba tira-leite elétrica - Momcozy",                         qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Monitor de bebê WiFi com 2 câmeras 5\" 1080P - BM4 Smart",   qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Travesseiro de apoio",                                        qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Lençol para berço",                                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Cobertor básico (6-12M)",                                     qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Cobertor básico (RN)",                                        qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Mitenes para bebê",                                           qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Trocador portátil",                                           qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Quarto & Berço",       nome: "Sling / carregador de bebê",                                  qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga longa - RN",                                       qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga longa - 0-3M",                                     qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga longa - 3-6M",                                     qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga longa - 6-9M",                                     qty: 5,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga longa - 9-12M",                                    qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga curta - RN",                                       qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga curta - 3-6M",                                     qty: 8,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga curta - 6-9M",                                     qty: 5,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Body manga curta - 9-12M",                                    qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Calça / shorts - 0-3M",                                       qty: 6,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Calça / shorts - 3-6M",                                       qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Calça / shorts - 6-9M",                                       qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Calça / shorts - 9-12M",                                      qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Macacão / sleeper - RN",                                      qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Macacão / sleeper - 3-6M",                                    qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Macacão / sleeper - 6-9M",                                    qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Macacão / sleeper - 9-12M",                                   qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Casaco leve - 0-3M",                                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Casaco leve - 3-6M",                                          qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Casaco leve - 6-9M",                                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Casaco leve - 9-12M",                                         qty: 3,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Pijama - 3-6M",                                               qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Pijama - 6-9M",                                               qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Pijama - 9-12M",                                              qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meias - RN-3M",                                               qty: 6,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meias - 3-6M",                                                qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meias - 6-12M",                                               qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Sapatinho macio de tecido - 0-3M",                            qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Sapatinho elegante (ocasiões) - 3-6M",                        qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Sapato respirável de tecido - 3-6M",                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Tênis macio - 3-6M",                                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meia antiderrapante - 3-6M",                                  qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Tênis macio - 6-9M",                                          qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meia antiderrapante - 6-9M",                                  qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Primeiros passos (sola flexível) - 6-9M",                     qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Meia antiderrapante - 9-12M",                                 qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Tênis regular - RN-3M",                                       qty: 6,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Tênis regular - 3-6M",                                        qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Tênis regular - 6-12M",                                       qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Roupinhas",            nome: "Sapatilha para bebê - 6-12M",                                 qty: 4,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Passeio & Transporte", nome: "Carrinho de bebê",                                            qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Passeio & Transporte", nome: "Cadeirinha de carro infantil - 6-12M",                        qty: 2,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Passeio & Transporte", nome: "Acessório para carrinho (1)",                                 qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Passeio & Transporte", nome: "Acessório para carrinho (2)",                                 qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+  { cat: "Passeio & Transporte", nome: "Bolsa de fraldas",                                            qty: 1,  valor: 0, status: "temos", presente: false, presenteDe: "" },
+];
+
+const fmt = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+let catAtiva = "Todas";
+let filtroStatus = "Todos";
+let editandoId = null;
+let itens = [];
+
+// ── AUTH ──────────────────────────────────────
+window.fazerLogin = () => signInWithPopup(auth, provider);
+window.fazerLogout = () => signOut(auth);
+
+onAuthStateChanged(auth, u => {
+  if (u && EMAILS_PERMITIDOS.includes(u.email)) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("user-foto").src = u.photoURL;
+    document.getElementById("erro-login").style.display = "none";
+    iniciarFirestore();
+  } else if (u) {
+    signOut(auth);
+    document.getElementById("erro-login").style.display = "block";
+  } else {
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+  }
+});
+
+// ── FIRESTORE ────────────────────────────────
+function iniciarFirestore() {
+  onSnapshot(collection(db, "itens"), snap => {
+    const dados = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (dados.length === 0) {
+      ITENS_INICIAIS.forEach(it => addDoc(collection(db, "itens"), it));
+    } else {
+      itens = dados;
+      renderTudo();
+    }
+  });
+}
+
+// ── RENDER ───────────────────────────────────
+function renderTudo() {
+  renderFiltros();
+  renderLista();
+  renderMetricas();
+  popularSelectCat("add-cat", "Roupinhas");
+}
+
+function renderMetricas() {
+  const temos     = itens.filter(i => i.status === "temos");
+  const pct       = itens.length ? Math.round(temos.length / itens.length * 100) : 0;
+  const gasto     = temos.filter(i => !i.presente).reduce((s, i) => s + (i.valor || 0), 0);
+  const presentes = temos.filter(i => i.presente).reduce((s, i) => s + (i.valor || 0), 0);
+  document.getElementById("m-pct").textContent      = pct + "%";
+  document.getElementById("m-sub").textContent      = `${temos.length} de ${itens.length} itens`;
+  document.getElementById("m-gasto").textContent    = fmt(gasto);
+  document.getElementById("m-presentes").textContent= fmt(presentes);
+  document.getElementById("barra").style.width      = pct + "%";
+}
+
+function renderFiltros() {
+  const el = document.getElementById("filtros");
+  const statusOpts = [["Todos", null], ["falta", "#E24B4A"], ["temos", "#1D9E75"]];
+  const statusLabels = { falta: "Falta comprar", temos: "Já temos" };
+  let html = statusOpts.map(([s, dot]) => `
+    <button class="filtro-btn ${filtroStatus === s ? "ativo" : ""}" onclick="setFiltroStatus('${s}')">
+      ${dot ? `<span class="filtro-dot" style="background:${dot}"></span>` : ""}
+      ${s === "Todos" ? "Todos" : statusLabels[s]}
+    </button>`).join("");
+  html += `<div class="filtro-sep"></div>`;
+  html += `<button class="filtro-btn ${catAtiva === "Todas" ? "ativo" : ""}" onclick="setCat('Todas')">Todas</button>`;
+  html += Object.entries(CATEGORIAS).map(([c, v]) => `
+    <button class="filtro-btn ${catAtiva === c ? "ativo" : ""}" onclick="setCat('${c}')">
+      ${v.emoji} ${c}
+    </button>`).join("");
+  el.innerHTML = html;
+}
+
+function renderLista() {
+  const filtrados = itens
+    .filter(i => (catAtiva === "Todas" || i.cat === catAtiva) && (filtroStatus === "Todos" || i.status === filtroStatus))
+    .sort((a, b) => catAtiva !== "Todas" ? 0 : a.status === b.status ? 0 : a.status === "falta" ? -1 : 1);
+
+  const el = document.getElementById("lista");
+  if (!filtrados.length) { el.innerHTML = `<p style="color:#5a7a70;font-size:14px;padding:1rem 0">Nenhum item encontrado.</p>`; return; }
+
+  el.innerHTML = filtrados.map((item, idx) => {
+    const cat = CATEGORIAS[item.cat];
+    const resolvido = item.status === "temos";
+    const ultimo = idx === filtrados.length - 1;
+    const editando = editandoId === item.id;
+    return `
+      <div>
+        <div class="item-row">
+          <button class="status-btn ${resolvido ? "temos" : ""}" onclick="toggleStatus('${item.id}','${item.status}')"></button>
+          <div class="item-info">
+            <div class="item-nome ${resolvido ? "riscado" : ""}">${item.nome}</div>
+            <div class="item-tags">
+              <span style="font-size:12px;color:#5a7a70">Qtd: ${item.qty}</span>
+              ${item.valor > 0 ? `<span style="font-size:12px;color:#5a7a70">${fmt(item.valor)}</span>` : ""}
+              ${item.presente ? `<span class="item-tag tag-presente">Presente${item.presenteDe ? " de " + item.presenteDe : ""}</span>` : ""}
+              <span class="item-tag" style="background:${cat.cor};color:${cat.corText}">${cat.emoji} ${item.cat}</span>
+            </div>
+          </div>
+          <div class="item-acoes">
+            <button class="btn-acao" onclick="toggleEdit('${item.id}')">✏️</button>
+            <button class="btn-acao" onclick="removerItem('${item.id}')">🗑️</button>
+          </div>
+        </div>
+        ${editando ? renderEdit(item) : ""}
+        ${!ultimo ? `<div class="item-sep"></div>` : ""}
+      </div>`;
+  }).join("");
+}
+
+function renderEdit(item) {
+  const cats = Object.keys(CATEGORIAS).map(c => `<option ${item.cat === c ? "selected" : ""}>${c}</option>`).join("");
+  return `
+    <div class="edit-box" id="edit-${item.id}">
+      <div><label>Quantidade</label><input type="number" min="1" value="${item.qty}" onchange="atualizar('${item.id}','qty',+this.value)"></div>
+      <div><label>Valor (R$)</label><input type="number" min="0" step="0.01" value="${item.valor||0}" onchange="atualizar('${item.id}','valor',+this.value)"></div>
+      <div class="full">
+        <div class="presente-row">
+          <label><input type="checkbox" ${item.presente ? "checked" : ""} onchange="toggleBool('${item.id}','presente',${item.presente})"> É presente?</label>
+          <input id="pd-${item.id}" placeholder="De quem?" value="${item.presenteDe||''}" style="display:${item.presente ? "block" : "none"};flex:1;min-width:120px;padding:6px 10px;border-radius:8px;border:0.5px solid #c5d9d0;font-size:14px;font-family:inherit;" onchange="atualizar('${item.id}','presenteDe',this.value)">
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="toggleEdit('${item.id}')">Salvar</button>
+    </div>`;
+}
+
+function popularSelectCat(id, defaultCat) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = Object.keys(CATEGORIAS).map(c => `<option ${c === defaultCat ? "selected" : ""}>${c}</option>`).join("");
+}
+
+// ── AÇÕES ────────────────────────────────────
+window.setFiltroStatus = s => { filtroStatus = s; renderTudo(); };
+window.setCat          = c => { catAtiva = c; renderTudo(); };
+window.toggleEdit      = id => { editandoId = editandoId === id ? null : id; renderLista(); };
+window.toggleStatus    = (id, status) => updateDoc(doc(db, "itens", id), { status: status === "falta" ? "temos" : "falta" });
+window.atualizar       = (id, campo, val) => updateDoc(doc(db, "itens", id), { [campo]: val });
+window.toggleBool      = (id, campo, val) => updateDoc(doc(db, "itens", id), { [campo]: !val });
+window.removerItem     = id => { deleteDoc(doc(db, "itens", id)); if (editandoId === id) editandoId = null; };
+
+// Adicionar
+window.abrirAdicionar  = () => { document.getElementById("add-box").style.display = "flex"; document.getElementById("btn-adicionar") && (document.querySelector(".btn-adicionar").style.display = "none"); };
+window.fecharAdicionar = () => { document.getElementById("add-box").style.display = "none"; document.querySelector(".btn-adicionar").style.display = "block"; };
+window.toggleAddPresente = () => {
+  const checked = document.getElementById("add-presente").checked;
+  document.getElementById("add-presenteDe").style.display = checked ? "block" : "none";
+};
+window.confirmarAdicionar = () => {
+  const nome = document.getElementById("add-nome").value.trim();
+  if (!nome) return;
+  addDoc(collection(db, "itens"), {
+    nome, status: "falta",
+    cat:       document.getElementById("add-cat").value,
+    qty:       +document.getElementById("add-qty").value,
+    valor:     +document.getElementById("add-valor").value,
+    presente:  document.getElementById("add-presente").checked,
+    presenteDe:document.getElementById("add-presenteDe").value,
+  });
+  document.getElementById("add-nome").value = "";
+  document.getElementById("add-qty").value = "1";
+  document.getElementById("add-valor").value = "0";
+  document.getElementById("add-presente").checked = false;
+  document.getElementById("add-presenteDe").style.display = "none";
+  document.getElementById("add-presenteDe").value = "";
+  fecharAdicionar();
+};
+</script>
+</body>
+</html>
