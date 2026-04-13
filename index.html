@@ -6,22 +6,24 @@
 <title>MikeCycle</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-
   :root {
-    --bg: #242323;
-    --surface: #2e2d2d;
-    --surface2: #363636;
-    --border: #525254;
-    --accent: #795238;
-    --accent2: #AEA7A3;
-    --warn: #795238;
-    --text: #AEA7A3;
-    --text-muted: #959595;
+    --bg: #1a1a1a;
+    --surface: #242323;
+    --surface2: #2e2d2d;
+    --border: #3a3a3a;
+    --accent: #C9972A;
+    --accent2: #e0a830;
+    --warn: #C9972A;
+    --text: #f0ece8;
+    --text-muted: #8a8480;
     --text-dim: #525254;
-    --checked: #2a1f18;
-    --checked-border: #795238;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --checked: #2a2018;
+    --checked-border: #C9972A;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --gold: #C9972A;
+    --gold-light: rgba(201,151,42,0.15);
+    --gold-border: rgba(201,151,42,0.35);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,9 +49,9 @@
   }
 
   .container {
-    max-width: 960px;
+    max-width: 480px;
     margin: 0 auto;
-    padding: 32px 20px 80px;
+    padding: 24px 0 80px;
     position: relative;
     z-index: 1;
   }
@@ -165,14 +167,14 @@
   .logo-tag {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--accent);
+    color: var(--gold);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     margin-bottom: 4px;
   }
 
-  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
-  h1 span { color: var(--accent); }
+  h1 { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+  h1 span { color: var(--gold); }
 
   .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 
@@ -230,7 +232,7 @@
   }
 
   .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
-  .sync-dot.synced  { background: var(--accent); }
+  .sync-dot.synced  { background: var(--gold); }
   .sync-dot.error   { background: var(--warn); }
 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
@@ -249,24 +251,24 @@
 
   .progress-label { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; white-space: nowrap; }
   .progress-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.5s ease; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--accent2)); border-radius: 3px; transition: width 0.5s ease; animation: progressFill 1s ease; }
   .progress-pct { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--accent); white-space: nowrap; min-width: 40px; text-align: right; }
 
   /* Main nav */
   .main-nav {
     display: flex;
     gap: 4px;
-    margin-bottom: 24px;
+    margin: 16px 20px 24px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
     padding: 4px;
     width: fit-content;
   }
 
   .main-tab {
     padding: 8px 22px;
-    border-radius: 6px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
@@ -279,22 +281,23 @@
   }
 
   .main-tab.active {
-    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,153,255,0.1));
-    color: var(--accent);
+    background: linear-gradient(135deg, var(--gold), var(--accent2));
+    color: #000;
+    box-shadow: 0 0 12px rgba(201,151,42,0.3);
   }
 
   /* Day tabs */
-  .day-tabs { display: flex; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .day-tabs { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin: 0 20px 8px; scrollbar-width: none; }
   .day-tabs::-webkit-scrollbar { display: none; }
 
   .day-tab {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px;
+    border-radius: var(--radius);
+    padding: 10px 4px;
     cursor: pointer;
     font-family: 'Syne', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
     white-space: nowrap;
@@ -303,14 +306,13 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    min-width: 72px;
   }
 
   .day-tab .day-name { font-size: 12px; letter-spacing: 0.05em; }
   .day-tab .day-dots { display: flex; gap: 3px; }
   .day-tab .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
   .day-tab:hover { border-color: var(--accent2); color: var(--text); }
-  .day-tab.active { background: linear-gradient(135deg, rgba(0,229,160,0.12), rgba(0,153,255,0.08)); border-color: var(--accent); color: var(--accent); }
+  .day-tab.active { background: var(--gold-light); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 10px rgba(201,151,42,0.2); }
   .day-tab.today { position: relative; }
   .day-tab.today::after { content: '●'; position: absolute; top: -6px; right: -6px; font-size: 8px; color: var(--accent); }
   .day-tab.treino { border-bottom: 2px solid var(--warn); }
@@ -328,7 +330,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .day-header { display: flex; align-items: center; justify-content: space-between; margin: 24px 20px 16px; flex-wrap: wrap; gap: 12px; }
   .day-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
   .day-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
 
@@ -343,12 +345,13 @@
     align-items: center;
     gap: 14px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
     user-select: none;
   }
+  .med-item:active { transform: scale(0.98); }
 
-  .med-item:hover { border-color: rgba(0,229,160,0.3); background: var(--surface2); }
-  .med-item.checked { background: var(--checked); border-color: var(--checked-border); opacity: 0.75; }
+  .med-item:hover { border-color: var(--gold-border); background: var(--surface2); }
+  .med-item.checked { background: var(--gold-light); border-color: var(--gold-border); opacity: 0.85; }
 
   .med-checkbox {
     width: 20px; height: 20px;
@@ -361,7 +364,7 @@
     transition: all 0.2s;
   }
 
-  .med-item.checked .med-checkbox { background: var(--accent); border-color: var(--accent); }
+  .med-item.checked .med-checkbox { background: var(--gold); border-color: var(--gold); }
   .med-checkbox svg { display: none; }
   .med-item.checked .med-checkbox svg { display: block; }
 
@@ -372,7 +375,7 @@
 
   .med-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
   .tag-treino   { color: var(--warn); border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.08); }
-  .tag-noite    { color: #a78bfa; border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .tag-noite    { color: #b8a0e8; border-color: rgba(184,160,232,0.4); background: rgba(184,160,232,0.08); }
   .tag-manha    { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
   .tag-cafe     { color: var(--accent2); border-color: rgba(0,153,255,0.4); background: rgba(0,153,255,0.08); }
   .tag-standard { color: var(--text-muted); border-color: var(--border); background: transparent; }
@@ -413,6 +416,37 @@
 
 
 
+
+  /* ── ANIMAÇÕES ───────────────────────────────────────── */
+  @keyframes tabIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes tabOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes progressFill {
+    from { width: 0%; }
+  }
+  @keyframes tapScale {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+
+  .tab-enter { animation: tabIn 0.25s ease forwards; }
+
+  .card-tap:active { animation: tapScale 0.15s ease; }
+
+  .gradient-gold {
+    background: linear-gradient(90deg, var(--gold), var(--accent2));
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 12px rgba(201,151,42,0.25);
+  }
+
   /* ── REMÉDIOS SECTION ────────────────────────────────── */
   .med-section { margin-bottom: 24px; }
 
@@ -428,14 +462,14 @@
     transition: all 0.2s;
     user-select: none;
   }
-  .med-toggle:hover { border-color: rgba(0,229,160,0.4); }
-  .med-toggle.open { border-radius: var(--radius) var(--radius) 0 0; border-color: rgba(0,229,160,0.5); }
+  .med-toggle:hover { border-color: var(--gold-border); }
+  .med-toggle.open { border-radius: var(--radius) var(--radius) 0 0; border-color: var(--gold-border); }
 
   .med-toggle-left { display: flex; align-items: center; gap: 12px; }
   .med-toggle-icon {
     width: 32px; height: 32px;
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.3);
+    background: var(--gold-light);
+    border: 1px solid var(--gold-border);
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     font-size: 16px;
@@ -449,7 +483,7 @@
   .med-body {
     display: none;
     background: var(--surface);
-    border: 1px solid rgba(0,229,160,0.5);
+    border: 1px solid var(--gold-border);
     border-top: none;
     border-radius: 0 0 var(--radius) var(--radius);
     padding: 16px 18px;
@@ -538,7 +572,7 @@
     cursor: pointer; transition: all 0.2s; user-select: none;
   }
   .ex-item:hover { border-color: rgba(255,107,53,0.3); }
-  .ex-item.done { background: rgba(255,107,53,0.06); border-color: rgba(255,107,53,0.4); opacity: 0.8; }
+  .ex-item.done { background: var(--gold-light); border-color: var(--gold-border); opacity: 0.85; }
 
   .ex-chk {
     width: 18px; height: 18px;
@@ -546,20 +580,21 @@
     border-radius: 4px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.2s;
+    pointer-events: none;
   }
-  .ex-item.done .ex-chk { background: var(--warn); border-color: var(--warn); }
+  .ex-item.done .ex-chk { background: var(--gold); border-color: var(--gold); }
   .ex-chk svg { display: none; }
   .ex-item.done .ex-chk svg { display: block; }
 
-  .ex-info { flex: 1; }
+  .ex-info { flex: 1; pointer-events: none; }
   .ex-name { font-size: 13px; font-weight: 600; }
   .ex-item.done .ex-name { text-decoration: line-through; color: var(--text-muted); }
-  .ex-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .ex-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; pointer-events: none; }
   .ex-badge {
     font-family: 'DM Mono', monospace; font-size: 10px;
     padding: 2px 7px; border-radius: 4px; border: 1px solid;
   }
-  .ex-badge.series { color: var(--warn); border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.06); }
+  .ex-badge.series { color: var(--gold); border-color: var(--gold-border); background: var(--gold-light); }
   .ex-badge.carga  { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
 
   .ex-del { width:24px; height:24px; border:none; background:none; color:var(--text-muted); cursor:pointer; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; opacity:0; transition:all 0.15s; flex-shrink:0; }
@@ -632,6 +667,90 @@
   .treino-obs-input:focus { border-color: var(--warn); }
 
 
+
+
+  /* ── DIAS SELECTOR ───────────────────────────────────── */
+  .dias-selector {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .dia-check {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .dia-check.selected {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-light);
+  }
+
+  .dia-check input { display: none; }
+
+  /* ── FICHA SELECTOR ──────────────────────────────────── */
+  .ficha-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .ficha-switch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .ficha-switch-select {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ficha-switch-select:focus { border-color: var(--gold); }
+  .ficha-switch-select option { background: var(--surface2); }
+
+  .btn-ficha-apply {
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .btn-ficha-apply:hover { opacity: 0.85; }
+
   /* ── CRONÔMETRO ──────────────────────────────────────── */
   .crono-wrap {
     background: var(--bg);
@@ -702,7 +821,7 @@
     user-select: none;
   }
   .cardio-row:hover { border-color: rgba(0,153,255,0.4); background: var(--surface2); }
-  .cardio-row.done { background: rgba(0,153,255,0.08); border-color: rgba(0,153,255,0.5); }
+  .cardio-row.done { background: var(--gold-light); border-color: var(--gold-border); }
 
   .cardio-checkbox {
     width: 20px; height: 20px;
@@ -714,7 +833,7 @@
     justify-content: center;
     transition: all 0.2s;
   }
-  .cardio-row.done .cardio-checkbox { background: var(--accent2); border-color: var(--accent2); }
+  .cardio-row.done .cardio-checkbox { background: var(--gold); border-color: var(--gold); }
   .cardio-checkbox svg { display: none; }
   .cardio-row.done .cardio-checkbox svg { display: block; }
 
@@ -724,7 +843,7 @@
     color: var(--text-muted);
     letter-spacing: 0.02em;
   }
-  .cardio-row.done .cardio-label { color: var(--accent2); }
+  .cardio-row.done .cardio-label { color: var(--gold); }
 
   .cardio-tag {
     margin-left: auto;
@@ -738,6 +857,37 @@
   }
 
 
+
+
+  /* ── ANIMAÇÕES ───────────────────────────────────────── */
+  @keyframes tabIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes tabOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes progressFill {
+    from { width: 0%; }
+  }
+  @keyframes tapScale {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+
+  .tab-enter { animation: tabIn 0.25s ease forwards; }
+
+  .card-tap:active { animation: tapScale 0.15s ease; }
+
+  .gradient-gold {
+    background: linear-gradient(90deg, var(--gold), var(--accent2));
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 12px rgba(201,151,42,0.25);
+  }
 
   /* ── REMÉDIOS SECTION ────────────────────────────────── */
 
@@ -867,7 +1017,7 @@
   .ex-checkbox svg { display: none; }
   .exercicio-item.done .ex-checkbox svg { display: block; }
 
-  .ex-info { flex: 1; }
+  .ex-info { flex: 1; pointer-events: none; }
   .ex-name { font-size: 13px; font-weight: 600; }
   .exercicio-item.done .ex-name { text-decoration: line-through; color: var(--text-muted); }
 
@@ -952,11 +1102,11 @@
   .field-select option { background: var(--surface2); }
 
   .btn-add {
-    background: var(--accent); color: #000; border: none; border-radius: var(--radius-sm);
+    background: var(--gold); color: #000; border: none; border-radius: var(--radius-sm);
     padding: 10px 20px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
     cursor: pointer; letter-spacing: 0.03em; transition: all 0.2s; white-space: nowrap; height: 40px;
   }
-  .btn-add:hover { background: #00ffb3; transform: translateY(-1px); }
+  .btn-add:hover { opacity: 0.88; transform: translateY(-1px); }
 
   .day-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
 
@@ -966,6 +1116,128 @@
     font-size: 11px; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s;
   }
   .btn-reset:hover { border-color: var(--warn); color: var(--warn); }
+
+
+  /* ── RELATÓRIO TREINOS ───────────────────────────────── */
+  .treino-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .treino-day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    min-height: 110px;
+  }
+
+  .treino-day-card.has-treino {
+    border-color: var(--gold-border);
+    background: var(--gold-light);
+  }
+
+  .treino-day-card.full {
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(201,151,42,0.2);
+  }
+
+  .treino-day-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .treino-day-card.has-treino .treino-day-label { color: var(--gold); }
+
+  .treino-day-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .treino-day-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .treino-day-card.has-treino .treino-day-name { color: var(--text); font-weight: 600; }
+
+  .treino-day-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: auto;
+  }
+
+  .treino-day-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .treino-day-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+  }
+
+  .treino-day-card.has-treino .treino-day-pct { color: var(--gold); font-weight: 600; }
+
+  .treino-cardio-badge {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  /* Resumo semanal treino */
+  .treino-week-summary {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .treino-summary-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .treino-summary-stat .stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .treino-summary-stat .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
 
   /* ── RELATÓRIO ─────────────────────────────────── */
   #viewRelatorio { display: none; }
@@ -1023,7 +1295,6 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
 </style>
 </head>
 <body>
@@ -1104,11 +1375,15 @@
       <div class="rel-section-label">Semana atual — em andamento</div>
       <div class="med-adherence-list" id="currentAdherence"></div>
     </div>
-    <!-- Cardio semana atual -->
+
+    <!-- Relatório de treinos -->
     <div class="rel-current" style="margin-bottom:28px;">
-      <div class="rel-section-label">Cardio — semana atual</div>
-      <div id="cardioWeekSummary"></div>
+      <div class="rel-section-label">Treinos — semana atual</div>
+      <div id="treinoWeekSummaryStats" class="treino-week-summary"></div>
+      <div class="treino-week-grid" id="treinoWeekGrid"></div>
+      <div id="cardioWeekSummary" style="margin-top:20px;"></div>
     </div>
+
     <div class="rel-section-label" style="margin-bottom:16px;">Histórico de semanas</div>
     <div class="history-list" id="historyList"></div>
   </div>
@@ -1408,10 +1683,23 @@ function setSyncStatus(status, label) {
 
 window.switchView = function(view) {
   currentView = view;
-  document.getElementById('viewAgenda').style.display    = view==='agenda'    ? 'block' : 'none';
-  document.getElementById('viewRelatorio').style.display = view==='relatorio' ? 'block' : 'none';
+  const agenda = document.getElementById('viewAgenda');
+  const rel    = document.getElementById('viewRelatorio');
+  if (view === 'agenda') {
+    agenda.style.display = 'block';
+    rel.style.display    = 'none';
+    agenda.classList.remove('tab-enter');
+    void agenda.offsetWidth;
+    agenda.classList.add('tab-enter');
+  } else {
+    agenda.style.display = 'none';
+    rel.style.display    = 'block';
+    rel.classList.remove('tab-enter');
+    void rel.offsetWidth;
+    rel.classList.add('tab-enter');
+    renderRelatorio();
+  }
   document.querySelectorAll('.main-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&view==='agenda')||(i===1&&view==='relatorio')));
-  if (view==='relatorio') renderRelatorio();
 };
 
 // ── Adherence ─────────────────────────────────────────────
@@ -1547,7 +1835,12 @@ function renderMedSection(day) {
               <option value="treino">Treino</option>
             </select>
           </div>
-          <button class="btn-add" onclick="addItem('${day}')">Adicionar</button>
+          <button class="btn-add" onclick="addItemDias('${day}')">Adicionar</button>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="field-label" style="margin-bottom:6px;">Dias da semana</div>
+          <div class="dias-selector" id="dias-sel-${day}">
+          </div>
         </div>
       </div>
     </div>`;
@@ -1626,6 +1919,14 @@ function renderTreinoDay(day) {
         </div>
       </div>
 
+      <div class="ficha-switch">
+        <span class="ficha-switch-label">Ficha</span>
+        <select class="ficha-switch-select" id="ficha-sel-${day}">
+          <option value="">— Personalizado —</option>
+          ${Object.keys(FICHAS).map(f => `<option value="${f}" ${t.nome === f ? 'selected' : ''}>${f}</option>`).join('')}
+        </select>
+        <button class="btn-ficha-apply" onclick="aplicarFicha('${day}')">Aplicar</button>
+      </div>
       <div class="treino-nome-wrap">
         <input class="treino-nome-input" id="treino-nome-${day}" placeholder="Nome do treino (ex: Peito e Bíceps)" value="${t.nome || ''}" />
         <button class="btn-save-nome" onclick="saveNomeTreino('${day}')">Salvar</button>
@@ -1659,6 +1960,66 @@ function renderTreinoDay(day) {
       </div>
     </div>`;
 }
+
+window.toggleDiaCheck = function(label, event) {
+  event.preventDefault();
+  event.stopPropagation();
+  label.classList.toggle('selected');
+  label.querySelector('input').checked = label.classList.contains('selected');
+};
+
+window.addItemDias = async function(day) {
+  const nEl = document.getElementById(`inp-name-${day}`);
+  const dEl = document.getElementById(`inp-detail-${day}`);
+  const tEl = document.getElementById(`inp-tag-${day}`);
+  const name = nEl.value.trim();
+  if (!name) { nEl.focus(); return; }
+
+  // Pegar dias selecionados
+  const checks = document.querySelectorAll(`#dias-sel-${day} input:checked`);
+  const selectedDays = Array.from(checks).map(cb => cb.value);
+  if (selectedDays.length === 0) { showToast('Selecione ao menos um dia'); return; }
+
+  const newItem = { name, detail: dEl.value.trim(), tag: tEl.value, checked: false };
+
+  selectedDays.forEach(d => {
+    if (!state.days[d]) state.days[d] = [];
+    state.days[d].push({ ...newItem, id: `${d}-${Date.now()}-${Math.random().toString(36).slice(2)}` });
+  });
+
+  nEl.value = ''; dEl.value = ''; tEl.value = 'standard';
+
+  // Resetar dias selecionados para só o dia atual
+  document.querySelectorAll(`#dias-sel-${day} .dia-check`).forEach(label => {
+    const val = label.querySelector('input').value;
+    const sel = val === day;
+    label.classList.toggle('selected', sel);
+    label.querySelector('input').checked = sel;
+  });
+
+  renderMedSection(day);
+  renderTabs();
+  updateGlobalProgress();
+  await saveToFirestore();
+  showToast(`+ ${name} adicionado em ${selectedDays.length} dia(s)`);
+};
+
+window.aplicarFicha = function(day) {
+  const sel = document.getElementById(`ficha-sel-${day}`);
+  if (!sel || !sel.value) return;
+  const ficha = FICHAS[sel.value];
+  if (!ficha) return;
+  if (!confirm(`Substituir treino atual por "${sel.value}"?`)) return;
+  if (!state.treino) state.treino = {};
+  state.treino[day] = {
+    nome: sel.value,
+    exercicios: ficha.exercicios.map(ex => ({ nome: ex.nome, series: ex.series, carga: ex.carga, done: false })),
+    obs: ficha.obs || ''
+  };
+  saveState();
+  renderTreinoDay(day);
+  showToast(`✓ Ficha "${sel.value}" aplicada!`);
+};
 
 window.toggleTreinoBody = function(day) {
   const toggle = document.querySelector(`#treino-sec-${day} .treino-toggle`);
@@ -1720,11 +2081,75 @@ window.delEx = function(day, idx, e) {
   showToast('Exercício removido');
 };
 
+function renderTreinoWeekReport() {
+  const grid    = document.getElementById('treinoWeekGrid');
+  const stats   = document.getElementById('treinoWeekSummaryStats');
+  if (!grid || !stats) return;
+
+  const treino  = state.treino  || {};
+  const cardio  = state.cardio  || {};
+
+  let totalTreinos = 0, totalEx = 0, totalFeitos = 0;
+
+  const cards = DAYS.map(day => {
+    const t     = treino[day];
+    const exs   = t && t.exercicios ? t.exercicios : [];
+    const feito = exs.filter(e => e.done).length;
+    const total = exs.length;
+    const pct   = total ? Math.round((feito / total) * 100) : 0;
+    const hasTreino = total > 0;
+    const isFull    = hasTreino && pct === 100;
+    const temCardio = !!cardio[day];
+
+    if (hasTreino) { totalTreinos++; totalEx += total; totalFeitos += feito; }
+
+    const nome = t && t.nome ? t.nome : '';
+    const nomeShort = nome.length > 12 ? nome.substring(0, 11) + '…' : nome;
+
+    return `
+      <div class="treino-day-card${hasTreino ? ' has-treino' : ''}${isFull ? ' full' : ''}">
+        <span class="treino-day-label">${day.substring(0,3).toUpperCase()}</span>
+        <span class="treino-day-icon">${hasTreino ? '🏋️' : '—'}</span>
+        ${nome ? `<span class="treino-day-name">${nomeShort}</span>` : '<span class="treino-day-name" style="color:var(--text-dim);">Descanso</span>'}
+        ${temCardio ? '<span class="treino-cardio-badge">🏃</span>' : ''}
+        <div class="treino-day-bar">
+          <div class="treino-day-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="treino-day-pct">${hasTreino ? pct + '%' : '—'}</span>
+      </div>`;
+  }).join('');
+
+  grid.innerHTML = cards;
+
+  const avgPct = totalEx ? Math.round((totalFeitos / totalEx) * 100) : 0;
+  const cardioDone = DAYS.filter(d => cardio[d]).length;
+
+  stats.innerHTML = `
+    <div class="treino-summary-stat">
+      <div class="stat-val">${totalTreinos}</div>
+      <div class="stat-label">Treinos</div>
+    </div>
+    <div class="treino-summary-stat">
+      <div class="stat-val">${totalFeitos}<span style="font-size:14px;color:var(--text-muted);">/${totalEx}</span></div>
+      <div class="stat-label">Exercícios</div>
+    </div>
+    <div class="treino-summary-stat">
+      <div class="stat-val">${avgPct}%</div>
+      <div class="stat-label">Conclusão</div>
+    </div>
+    <div class="treino-summary-stat">
+      <div class="stat-val">${cardioDone}</div>
+      <div class="stat-label">Cardio</div>
+    </div>`;
+}
+
 function renderRelatorio() {
   if (!state) return;
 
   // Cardio summary
   renderCardioSummary();
+  // Treino week report
+  renderTreinoWeekReport();
 
   // Semana atual
   const el  = document.getElementById('currentAdherence');
@@ -1895,6 +2320,18 @@ function renderPanels() {
     container.appendChild(panel);
     renderMedSection(day);
     renderTreinoDay(day);
+
+    // Preencher seletor de dias
+    const diasEl = document.getElementById(`dias-sel-${day}`);
+    if (diasEl) {
+      diasEl.innerHTML = DAYS.map(d => {
+        const sel = d === day;
+        return `<label class="dia-check${sel ? ' selected' : ''}" onclick="toggleDiaCheck(this, event)">
+          <input type="checkbox" value="${d}" ${sel ? 'checked' : ''} />
+          ${d.substring(0,3).toUpperCase()}
+        </label>`;
+      }).join('');
+    }
   });
 }
 
