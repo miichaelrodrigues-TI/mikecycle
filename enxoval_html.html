@@ -358,6 +358,12 @@ function renderLista() {
           <label>Prazo de entrega</label>
           <input type="date" value="${item.prazoEntrega || ""}" onchange="atualizar('${item.id}','prazoEntrega',this.value)">
         </div>` : ""}
+        <div class="edit-full">
+          <label>Categoria</label>
+          <select onchange="atualizar('${item.id}','cat',this.value)">
+            ${Object.keys(CATEGORIAS).map(c => `<option ${item.cat === c ? "selected" : ""}>${c}</option>`).join("")}
+          </select>
+        </div>
         <div class="edit-full" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#5a7a70;margin:0">
             <input type="checkbox" ${item.presente ? "checked" : ""} onchange="toggleBool('${item.id}','presente',${item.presente})"> É presente?
