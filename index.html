@@ -1376,25 +1376,6 @@ async function saveToFirestore() {
   setSyncStatus('syncing', 'Salvando...');
   try {
     await setDoc(stateRef(), state);
-    // Pré-carregar fichas nos dias definidos
-    const FICHAS_DIAS = {
-      'Sábado':  'Ombro + Tríceps',
-      'Domingo': 'Costas + Abdômen',
-      'Segunda': 'Ombro + Tríceps',
-    };
-    if (!state.treino) state.treino = {};
-    Object.entries(FICHAS_DIAS).forEach(([day, ficha]) => {
-      if (!state.treino[day]) {
-        state.treino[day] = { nome: ficha, exercicios: [], obs: '' };
-      }
-      if (!state.treino[day].nome) state.treino[day].nome = ficha;
-      if (state.treino[day].exercicios.length === 0 && FICHAS[ficha]) {
-        state.treino[day].exercicios = FICHAS[ficha].exercicios.map(ex => ({
-          nome: ex.nome, series: ex.series, carga: ex.carga, done: false
-        }));
-        state.treino[day].obs = FICHAS[ficha].obs || '';
-      }
-    });
     setSyncStatus('synced', 'Sincronizado');
   } catch(e) {
     setSyncStatus('error', 'Erro ao salvar');
@@ -1900,7 +1881,7 @@ window.addItemDias = async function(day) {
   showToast(`+ ${name} adicionado em ${selectedDays.length} dia(s)`);
 };
 
-window.aplicarFicha = function(day) {
+window.aplicarFicha = async function(day) {
   const sel = document.getElementById(`ficha-sel-${day}`);
   if (!sel || !sel.value) { showToast('Selecione uma ficha'); return; }
   const ficha = FICHAS[sel.value];
@@ -1912,7 +1893,7 @@ window.aplicarFicha = function(day) {
     exercicios: ficha.exercicios.map(ex => ({ nome: ex.nome, series: ex.series, carga: ex.carga, done: false })),
     obs: ficha.obs || ''
   };
-  saveState();
+  await saveToFirestore();
   renderTreinoDay(day);
   showToast(`✓ Ficha "${sel.value}" aplicada!`);
 };
