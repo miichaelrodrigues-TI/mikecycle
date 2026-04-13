@@ -2105,7 +2105,7 @@ function renderTreinoWeekReport() {
     const feito = exs.filter(e => e.done).length;
     const total = exs.length;
     const pct   = total ? Math.round((feito / total) * 100) : 0;
-    const hasTreino = total > 0;
+    const hasTreino = feito > 0;
     const isFull    = hasTreino && pct === 100;
     const temCardio = !!cardio[day];
 
