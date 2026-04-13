@@ -1819,6 +1819,7 @@ function renderTreinoDay(day) {
         <span class="ficha-switch-label">Ficha</span>
         <select class="ficha-switch-select" id="ficha-sel-${day}">
           <option value="">— Personalizado —</option>
+          ${Object.keys(FICHAS).map(f => '<option value="' + f + '"' + (t.nome === f ? ' selected' : '') + '>' + f + '</option>').join('')}
         </select>
         <button class="btn-ficha-apply" onclick="aplicarFicha('${day}')">Aplicar</button>
       </div>
@@ -1901,7 +1902,7 @@ window.addItemDias = async function(day) {
 
 window.aplicarFicha = function(day) {
   const sel = document.getElementById(`ficha-sel-${day}`);
-  if (!sel || !sel.value) return;
+  if (!sel || !sel.value) { showToast('Selecione uma ficha'); return; }
   const ficha = FICHAS[sel.value];
   if (!ficha) return;
   if (!confirm(`Substituir treino atual por "${sel.value}"?`)) return;
@@ -2228,18 +2229,7 @@ function renderPanels() {
       }).join('');
     }
 
-    // Preencher seletor de fichas
-    const fichaSelEl = document.getElementById(`ficha-sel-${day}`);
-    if (fichaSelEl) {
-      const currentNome = (state.treino && state.treino[day]) ? state.treino[day].nome : '';
-      Object.keys(FICHAS).forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f;
-        opt.textContent = f;
-        if (f === currentNome) opt.selected = true;
-        fichaSelEl.appendChild(opt);
-      });
-    }
+
   });
 }
 
