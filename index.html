@@ -1121,22 +1121,26 @@
   /* ── RELATÓRIO TREINOS ───────────────────────────────── */
   .treino-week-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .treino-week-grid { grid-template-columns: repeat(4, 1fr); }
   }
 
   .treino-day-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 10px 8px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
     transition: all 0.2s;
-    min-height: 110px;
+    min-height: 120px;
   }
 
   .treino-day-card.has-treino {
@@ -1166,11 +1170,15 @@
 
   .treino-day-name {
     font-family: 'DM Mono', monospace;
-    font-size: 8px;
+    font-size: 9px;
     color: var(--text-muted);
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.4;
     word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .treino-day-card.has-treino .treino-day-name { color: var(--text); font-weight: 600; }
@@ -2104,7 +2112,7 @@ function renderTreinoWeekReport() {
     if (hasTreino) { totalTreinos++; totalEx += total; totalFeitos += feito; }
 
     const nome = t && t.nome ? t.nome : '';
-    const nomeShort = nome.length > 12 ? nome.substring(0, 11) + '…' : nome;
+    const nomeShort = nome;
 
     return `
       <div class="treino-day-card${hasTreino ? ' has-treino' : ''}${isFull ? ' full' : ''}">
