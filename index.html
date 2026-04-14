@@ -1249,7 +1249,7 @@
 import { initializeApp }                              from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
                                                       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc }
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot }
                                                       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── Firebase config ───────────────────────────────────────
@@ -1274,50 +1274,63 @@ function historyRef() { return collection(db, 'users', uid, 'history'); }
 async function loadFromFirestore() {
   showLoading(true);
   try {
-    // Load state
+    // Load state — sempre do Firestore, nunca do cache
     const snap = await getDoc(stateRef());
     if (snap.exists()) {
       state = snap.data();
-      // Ensure all days exist
-      DAYS.forEach(d => {
-        if (!state.days[d]) {
-          state.days[d] = (INITIAL[d]||[]).map((m,i)=>({
-            id:`${d}-${i}-${Date.now()}`, name:m.name, detail:m.detail, tag:m.tag, checked:false
-          }));
-        }
-      });
+      // Garantir que todos os dias existam (sem sobrescrever dados)
+      DAYS.forEach(d => { if (!state.days[d]) state.days[d] = []; });
     } else {
-      // Novo usuário: estado vazio
+      // Novo usuário: estado totalmente vazio
       state = { days:{}, weekStart: getWeekStart() };
       DAYS.forEach(d => { state.days[d] = []; });
       await saveToFirestore();
     }
+
+    // Garantir estrutura mínima
+    if (!state.treino)  state.treino  = {};
+    if (!state.cardio)  state.cardio  = {};
+    if (!state.weekStart) state.weekStart = getWeekStart();
+
+    // Pré-carregar fichas SOMENTE se o dia não tiver nenhum dado ainda
+    const FICHAS_DIAS = {
+      'Sábado':  'Ombro + Tríceps',
+      'Domingo': 'Costas + Abdômen',
+      'Segunda': 'Ombro + Tríceps',
+    };
+    Object.entries(FICHAS_DIAS).forEach(([day, ficha]) => {
+      if (!state.treino[day]) {
+        state.treino[day] = {
+          nome: ficha,
+          exercicios: FICHAS[ficha] ? FICHAS[ficha].exercicios.map(ex => ({
+            nome: ex.nome, series: ex.series, carga: ex.carga, done: false
+          })) : [],
+          obs: FICHAS[ficha] ? FICHAS[ficha].obs || '' : ''
+        };
+      }
+    });
 
     // Load history
     const hSnap = await getDocs(historyRef());
     history = [];
     hSnap.forEach(d => history.push({ firestoreId: d.id, ...d.data() }));
     history.sort((a,b) => a.weekStart > b.weekStart ? 1 : -1);
-
-    // Pré-carregar fichas nos dias definidos
-    const FICHAS_DIAS = {
-      'Sábado':  'Ombro + Tríceps',
-      'Domingo': 'Costas + Abdômen',
-      'Segunda': 'Ombro + Tríceps',
-    };
-    if (!state.treino) state.treino = {};
-    Object.entries(FICHAS_DIAS).forEach(([day, ficha]) => {
-      if (!state.treino[day]) {
-        state.treino[day] = { nome: ficha, exercicios: [], obs: '' };
-      }
-      if (!state.treino[day].nome) state.treino[day].nome = ficha;
-      if (state.treino[day].exercicios.length === 0 && FICHAS[ficha]) {
-        state.treino[day].exercicios = FICHAS[ficha].exercicios.map(ex => ({
-          nome: ex.nome, series: ex.series, carga: ex.carga, done: false
-        }));
-        state.treino[day].obs = FICHAS[ficha].obs || '';
+    // Listener em tempo real — sincroniza entre dispositivos
+    onSnapshot(stateRef(), (snap) => {
+      if (snap.exists() && !_saving) {
+        const remoteState = snap.data();
+        // Só atualiza se os dados forem diferentes
+        if (JSON.stringify(remoteState) !== JSON.stringify(state)) {
+          state = remoteState;
+          if (!state.treino) state.treino = {};
+          if (!state.cardio) state.cardio = {};
+          DAYS.forEach(d => { if (!state.days[d]) state.days[d] = []; });
+          render();
+          setSyncStatus('synced', 'Sincronizado');
+        }
       }
     });
+
     setSyncStatus('synced', 'Sincronizado');
   } catch(e) {
     setSyncStatus('error', 'Erro de sync');
@@ -1326,7 +1339,10 @@ async function loadFromFirestore() {
   showLoading(false);
 }
 
+let _saving = false;
+
 async function saveToFirestore() {
+  _saving = true;
   setSyncStatus('syncing', 'Salvando...');
   try {
     await setDoc(stateRef(), state);
@@ -1334,6 +1350,8 @@ async function saveToFirestore() {
   } catch(e) {
     setSyncStatus('error', 'Erro ao salvar');
     console.error(e);
+  } finally {
+    _saving = false;
   }
 }
 
